@@ -1,0 +1,12 @@
+name: spellstorm
+version: 0.1.0
+
+authors:
+  - Andrey Konovod <konovod@gmail.com>
+
+dependencies:
+  crsfml:
+    github: BlaXpirit/crsfml
+    version: 2.4.1
+
+license: GPL-3.0
