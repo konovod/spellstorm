@@ -42,19 +42,18 @@ module Spellstorm
       @frame.outline_color = SF::Color::Red
       @frame.fill_color = SF::Color::Transparent
       @frame.outline_thickness = 1
-      update_pos
     end
 
-    def update_pos
-      pos = vec(200,200)
+    def update_pos(state, index)
+      pos = vec(200+index*10,200+state.to_i*10)
       @label.position = pos
       @frame.position = pos
     end
 
-    def draw(target : SF::RenderTarget)
-
+    def draw(target : SF::RenderTarget, index : Int32, open : Bool = true)
+      update_pos(@state, index)
       target.draw @frame
-      target.draw @label
+      target.draw @label if open
     end
 
 

@@ -10,28 +10,28 @@ class TableSide
     @on_table = Array(Card).new
   end
 
-  def draw(target)
+  def draw(target, my_turn)
     #todo - draw decks
-    @drop.last.draw(target) unless @drop.empty?
-    @on_table.each(&.draw(target))
+    @drop.last.draw(target, 0) unless @drop.empty?
+    @on_table.each_with_index { |card, i| card.draw(target, i) }
+    @deck.each_with_index { |card, i| card.draw(target, i, my_turn) }
   end
 
 end
 
 
-class Table < Engine::GameObject
+class Table
 
-  def initialize(owner)
-    super(owner, 0, 0)
+  def initialize
     @sides = Hash(Player, TableSide).new
     Player.values.each do |p|
       @sides[p] = TableSide.new(p)
     end
   end
 
-  def draw(target)
+  def draw(target, cur_player)
     Player.values.each do |p|
-      @sides[p].draw(target)
+      @sides[p].draw(target, p == cur_player)
     end
   end
 

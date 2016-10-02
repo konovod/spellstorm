@@ -20,6 +20,7 @@ module Spellstorm
     end
 
     def draw
+        @table.draw(@window, Player::First)
         @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
         @window.draw(@fps_label)
     end
@@ -36,7 +37,7 @@ module Spellstorm
 
       @cards_db = CardsDB.new
       @decks = {Deck.new, Deck.new}
-      @table = Table.new(self)
+      @table = Table.new
 
     end
 
