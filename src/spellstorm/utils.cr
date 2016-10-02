@@ -7,7 +7,7 @@ CARD_HEIGHT = 160
 
 end
 
-def new_text(x,y,str,color)
+def new_text(x,y,str,color) : SF::Text
   atext = SF::Text.new
   atext.font = Engine::Font["default.ttf"]
   atext.string = str

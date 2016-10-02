@@ -6,8 +6,9 @@ require "./utils.cr"
 module Spellstorm
 
   class SpellstormGame < Engine::Game
-    @text : SF::Text
-    @cards_db : Array(Card)
+    @fps_label : SF::Text
+    getter cards_db
+    getter decks
 
     def on_mouse(event, x, y)
 
@@ -18,10 +19,8 @@ module Spellstorm
     end
 
     def draw
-        
-        @window.draw(@triangle)
-        @text.string = "FPS=#{@fps}, UPS=#{@ups}"
-        @window.draw(@text)
+        @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
+        @window.draw(@fps_label)
     end
 
     def process
@@ -32,17 +31,9 @@ module Spellstorm
     def initialize
       super
 
-      @triangle = SF::VertexArray.new(SF::Triangles, 3)
+      @fps_label = new_text(0,0,"FPS, UPS = 0123456789", SF::Color::Red)
 
-      # define the positions and colors of the triangle's points
-      @triangle[0] = SF::Vertex.new(SF.vector2(10, 10), SF::Color::Red)
-      @triangle[1] = SF::Vertex.new(SF.vector2(100, 10), SF::Color::Blue)
-      @triangle[2] = SF::Vertex.new(SF.vector2(100, 100), SF::Color::Green)
-      @text = new_text(100,100,"FPS, UPS = 0123456789", SF::Color::Red)
-
-      @cards_db = Array(Card).new
-      #Spellstorm.init_card_db(@cards_db)
-
+      @cards_db = CardsDB.new
       @decks = {Array(Card).new, Array(Card).new}
 
     end

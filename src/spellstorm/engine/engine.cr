@@ -18,7 +18,7 @@ module Engine
     def initialize(owner, x, y)
       @dead = false
       @pos = vec(x, y)
-      owner.objects << self
+      owner.objects << self if owner
     end
 
     def process

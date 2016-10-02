@@ -31,11 +31,11 @@ module Spellstorm
 
     abstract def typ_name : String
 
-    def initialize(owner, @name, @cost, @element, @power)
-      super(owner, 0, 0)
+    def initialize(@name, @cost, @element, @power)
+      super(nil, 0, 0)
       @state = CardState::Deck
       @index = 0 #TODO index
-      @label = new_text(0,0, atext, SF::Color::White)
+      @label = new_text(0,0, @name, SF::Color::White)
       @label.origin = vec(@label.local_bounds.width/2, @label.local_bounds.height/2)
       @frame = SF::RectangleShape.new
       @frame.size = vec(CARD_WIDTH, CARD_HEIGHT)
