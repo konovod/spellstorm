@@ -1,8 +1,13 @@
 require "crsfml/crsfml.cr"
 require "./engine/*"
+require "./cards/*"
+require "./utils.cr"
+
 module Spellstorm
 
   class SpellstormGame < Engine::Game
+    @text : SF::Text
+    @cards_db : Array(Card)
 
     def on_mouse(event, x, y)
 
@@ -13,7 +18,7 @@ module Spellstorm
     end
 
     def draw
-        #@debug_draw.draw @space
+        
         @window.draw(@triangle)
         @text.string = "FPS=#{@fps}, UPS=#{@ups}"
         @window.draw(@text)
@@ -33,14 +38,13 @@ module Spellstorm
       @triangle[0] = SF::Vertex.new(SF.vector2(10, 10), SF::Color::Red)
       @triangle[1] = SF::Vertex.new(SF.vector2(100, 10), SF::Color::Blue)
       @triangle[2] = SF::Vertex.new(SF.vector2(100, 100), SF::Color::Green)
+      @text = new_text(100,100,"FPS, UPS = 0123456789", SF::Color::Red)
 
-      @text = SF::Text.new
+      @cards_db = Array(Card).new
+      #Spellstorm.init_card_db(@cards_db)
 
-      @text.font = Engine::Font["default.ttf"] # font is a SF::Font
-      @text.string = "FPS, UPS = 0123456789"
-      @text.character_size = 24 # in pixels, not points!
-      @text.color = SF::Color::Red
-      @text.style = (SF::Text::Bold | SF::Text::Underlined)
+      @decks = {Array(Card).new, Array(Card).new}
+
     end
 
   end

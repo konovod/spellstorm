@@ -60,8 +60,6 @@ abstract class SimplePhysicObject < SpriteObject
     @leash.max_bias = my_maxspeed
     @leash.max_force = my_moveforce
     owner.space.add(@leash)
-
-    owner.objects << self
   end
 
   def draw(target : SF::RenderTarget)
