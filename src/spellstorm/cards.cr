@@ -19,7 +19,7 @@ module Spellstorm
     Air
   end
 
-  abstract class Card < Engine::GameObject
+  abstract class Card
     @label : SF::Text
     getter state
     getter index
@@ -32,7 +32,6 @@ module Spellstorm
     abstract def typ_name : String
 
     def initialize(@name, @cost, @element, @power)
-      super(nil, 0, 0)
       @state = CardState::Deck
       @index = 0 #TODO index
       @label = new_text(0,0, @name, SF::Color::White)

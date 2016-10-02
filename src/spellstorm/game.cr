@@ -9,6 +9,7 @@ module Spellstorm
     @fps_label : SF::Text
     getter cards_db
     getter decks
+    getter table
 
     def on_mouse(event, x, y)
 
@@ -34,7 +35,8 @@ module Spellstorm
       @fps_label = new_text(0,0,"FPS, UPS = 0123456789", SF::Color::Red)
 
       @cards_db = CardsDB.new
-      @decks = {Array(Card).new, Array(Card).new}
+      @decks = {Deck.new, Deck.new}
+      @table = Table.new(self)
 
     end
 

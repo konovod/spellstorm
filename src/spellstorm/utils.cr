@@ -5,6 +5,11 @@ module Spellstorm
 CARD_WIDTH = 120
 CARD_HEIGHT = 160
 
+enum Player
+  First
+  Second
+end
+
 end
 
 def new_text(x,y,str,color) : SF::Text
