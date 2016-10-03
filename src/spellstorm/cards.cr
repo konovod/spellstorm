@@ -29,6 +29,21 @@ module Spellstorm
     end
   end
 
+  struct CardPos
+    @pos : MyVec
+    @angle : Float64
+    def initialize(@pos, @angle)
+    end
+    def apply(states)
+      states.transform.translate(@pos)
+      states.transform.rotate(@angle)
+      return states
+    end
+    def invert
+      @pos.y = Engine::SCREENY - CARD_HEIGHT - @pos.y
+    end
+end
+
   class GameCard
     @elements : Array(SF::Drawable)
     @card : Card
@@ -62,7 +77,8 @@ module Spellstorm
     end
 
     def calc_pos(state, index)
-      return CARD_POS[state] + CARD_DELTA[state]*index
+      base = CARD_COORDS[state]
+      return CardPos.new(base[:pos] + base[:delta]*index, base[:angle0]+base[:dangle]*index)
       #      result = vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
     end
 
@@ -70,9 +86,7 @@ module Spellstorm
       @state = CardState::Deck
     end
 
-    def draw(target : SF::RenderTarget, states : SF::RenderStates, pos : MyVec, angle, open : Bool)
-      states.transform.translate(pos)
-      states.transform.rotate(angle)
+    def draw(target : SF::RenderTarget, states : SF::RenderStates,  open : Bool)
       if open
         @elements.each &.draw(target, states)
       else
@@ -83,9 +97,8 @@ module Spellstorm
 
     def draw(target : SF::RenderTarget, states : SF::RenderStates, index, reverted, open : Bool)
       apos = calc_pos(@state, index)
-      apos.y = Engine::SCREENY - CARD_HEIGHT - apos.y if reverted
-
-      draw(target, states, apos, 0, open)
+      apos.invert if reverted
+      draw(target, apos.apply(states), open)
     end
   end
 end
