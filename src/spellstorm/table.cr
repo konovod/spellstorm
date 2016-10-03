@@ -48,6 +48,7 @@ class TableSide
   def draw_card
     return if deck.empty?
     card = deck.pop
+    card.state = CardState::Hand
     @data[CardState::Hand] << card
   end
 

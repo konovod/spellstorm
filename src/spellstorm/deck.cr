@@ -11,8 +11,8 @@ module Spellstorm
     end
 
     def generate
-      5.times do
-        @data += CardsDB.instance.data.sample(10)
+      50.times do
+        @data << CardsDB.instance.sample.dup
       end
     end
 

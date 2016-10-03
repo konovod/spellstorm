@@ -21,7 +21,7 @@ module Spellstorm
 
   abstract class Card
     @elements : Array(SF::Drawable)
-    getter state
+    property state
 
     property cost : Int32
     property element : Element
