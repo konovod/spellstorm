@@ -20,9 +20,8 @@ module Spellstorm
   end
 
   abstract class Card
-    @label : SF::Text
+    @elements : Array(SF::Drawable)
     getter state
-    getter index
 
     property cost : Int32
     property element : Element
@@ -33,27 +32,44 @@ module Spellstorm
 
     def initialize(@name, @cost, @element, @power)
       @state = CardState::Deck
-      @index = 0 #TODO index
-      @label = new_text(0,0, @name, SF::Color::White)
-      @label.origin = vec(@label.local_bounds.width/2, @label.local_bounds.height/2)
-      @frame = SF::RectangleShape.new
-      @frame.size = vec(CARD_WIDTH, CARD_HEIGHT)
-      @frame.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
-      @frame.outline_color = SF::Color::Red
-      @frame.fill_color = SF::Color::Transparent
-      @frame.outline_thickness = 1
+
+      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @name,
+            size: 12, color: SF::Color::Black, centered: true)
+      label_cost = new_text(10, 10, @cost.to_s,
+            size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
+      label_power = new_text(CARD_WIDTH-10, 10, @cost.to_s,
+            size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
+
+
+      frame = SF::RectangleShape.new(vec(CARD_WIDTH, CARD_HEIGHT))
+      #frame.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
+      frame.outline_color = SF::Color::Red
+      frame.fill_color = SF::Color::White
+      frame.outline_thickness = 1
+
+      @elements = [] of SF::Drawable
+      @elements<<frame
+      @elements<<label_name
+      @elements<<label_cost
+      @elements<<label_power
+
     end
 
     def update_pos(state, index)
-      pos = vec(200+index*10,200+state.to_i*10)
-      @label.position = pos
-      @frame.position = pos
+      return vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
     end
 
-    def draw(target : SF::RenderTarget, index : Int32, open : Bool = true)
-      update_pos(@state, index)
-      target.draw @frame
-      target.draw @label if open
+    def draw(target : SF::RenderTarget, states : SF::RenderStates, index : Int32, open : Bool = true)
+      states.transform.translate(update_pos(@state, index))
+      if open
+        @elements.each &.draw(target, states)
+      else
+        @elements.first.draw(target, states)
+      end
+    end
+
+    def reset
+      @state = CardState::Deck
     end
 
 

@@ -14,7 +14,7 @@ class Assets
       resname = relpath.empty? ? fn : File.join(relpath, fn)
       if File.directory?(fullname)
         recursive_load(fullname, resname)
-      elsif {".png", ".bmp", ".gif",".jpeg"}.includes? File.extname(fn)
+      elsif {".png", ".bmp", ".gif",".jpeg", ".jpg"}.includes? File.extname(fn)
         puts "loading texture: #{fn}"
         @@tex[resname] = SF::Texture.from_file(fullname)
       elsif File.extname(fn) == ".ttf"

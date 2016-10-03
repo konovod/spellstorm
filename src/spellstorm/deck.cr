@@ -10,6 +10,12 @@ module Spellstorm
       @data = [] of Card
     end
 
+    def generate
+      5.times do
+        @data += CardsDB.instance.data.sample(10)
+      end
+    end
+
   end
 
 

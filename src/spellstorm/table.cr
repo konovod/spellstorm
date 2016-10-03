@@ -5,16 +5,50 @@ module Spellstorm
 
 class TableSide
   def initialize (player)
-    @deck = Array(Card).new
-    @drop = Array(Card).new
-    @on_table = Array(Card).new
+    @data = Hash(CardState, Array(Card)).new
+    CardState.values.each do |p|
+      @data[p] = Array(Card).new
+    end
   end
 
-  def draw(target, my_turn)
-    #todo - draw decks
-    @drop.last.draw(target, 0) unless @drop.empty?
-    @on_table.each_with_index { |card, i| card.draw(target, i) }
-    @deck.each_with_index { |card, i| card.draw(target, i, my_turn) }
+  #todo - macroses
+  def deck
+    @data[CardState::Deck]
+  end
+
+  def hand
+    @data[CardState::Hand]
+  end
+
+  def on_table
+    @data[CardState::Table]
+  end
+
+  def drop
+    @data[CardState::Drop]
+  end
+
+  def draw(target, states, my_turn)
+    drop.last.draw(target, states, 0) unless drop.empty?
+    on_table.each_with_index { |card, i| card.draw(target, states, i) }
+    hand.each_with_index { |card, i| card.draw(target, states, i, my_turn) }
+    deck.first.draw(target, states, 0, false) unless deck.empty?
+  end
+
+  def new_game(adeck)
+    drop.clear
+    on_table.clear
+    hand.clear
+    deck.clear
+    deck.concat adeck.data.shuffle
+    deck.each &.reset
+    5.times { draw_card }
+  end
+
+  def draw_card
+    return if deck.empty?
+    card = deck.pop
+    @data[CardState::Hand] << card
   end
 
 end
@@ -29,10 +63,18 @@ class Table
     end
   end
 
-  def draw(target, cur_player)
-    Player.values.each do |p|
-      @sides[p].draw(target, p == cur_player)
+  def draw(target, states, cur_player)
+      @sides[Player::First].draw(target, states, cur_player == Player::First)
+      #states.transform.scale(0,-1)
+      states.transform.rotate(10)
+      @sides[Player::Second].draw(target, states, cur_player == Player::Second)
+  end
+
+  def new_game(decks)
+    Player.values.zip(decks.to_a).each do |p, d|
+      @sides[p].new_game(d)
     end
+
   end
 
 end

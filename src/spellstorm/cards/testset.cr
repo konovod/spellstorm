@@ -5,9 +5,19 @@ require "./basic.cr"
 module Spellstorm
 
 class CardsDB
+  @@instance : CardsDB?
+
+  def self.instance : CardsDB
+    item = @@instance
+    return item if item
+    item = new
+    @@instance = item
+    item
+  end
+
   getter data : Array(Card)
 
-  def initialize
+  private def initialize
     @data = [] of Card
     #@name, @cost, @element, @power
     @data << ShieldCard.new("Малый щит",2,Element::Neutral,2)

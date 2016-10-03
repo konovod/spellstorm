@@ -25,6 +25,25 @@ abstract class SpriteObject < GameObject
 
 end
 
+
+class Background < GameObject
+
+  def initialize(owner, tex : SF::Texture)
+    super(owner, 0,0)
+    @obj = SF::RectangleShape.new({SCREENX, SCREENY})
+    tex.repeated = true
+    @obj.texture = tex
+    w = tex.size.x
+    h = tex.size.y
+    @obj.texture_rect = SF.int_rect(0, 0, SCREENX, SCREENY)
+  end
+
+  def draw(target : SF::RenderTarget)
+    target.draw @obj
+  end
+
+end
+
 abstract class SimplePhysicObject < SpriteObject
 
   getter target : MyVec
