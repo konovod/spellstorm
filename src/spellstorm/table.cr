@@ -4,7 +4,9 @@ require "./engine/*"
 module Spellstorm
 
 class TableSide
+  @reverted : Bool
   def initialize (player)
+    @reverted = player == Player::Second
     @data = Hash(CardState, Array(GameCard)).new
     CardState.values.each do |p|
       @data[p] = Array(GameCard).new
@@ -20,8 +22,8 @@ class TableSide
     @data[CardState::Hand]
   end
 
-  def on_table
-    @data[CardState::Table]
+  def field
+    @data[CardState::Field]
   end
 
   def drop
@@ -29,21 +31,23 @@ class TableSide
   end
 
   def draw(target, states, my_turn)
-    drop.last.draw(target, states, 0) unless drop.empty?
-    on_table.each_with_index { |card, i| card.draw(target, states, i) }
-    hand.each_with_index { |card, i| card.draw(target, states, i, my_turn) }
-    deck.first.draw(target, states, 0, false) unless deck.empty?
+    drop.last(3).each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
+    field.each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
+    hand.each_with_index { |card, i| card.draw(target, states, i, @reverted, my_turn) }
+    deck.first.draw(target, states, 0, @reverted, false) unless deck.empty?
   end
 
   def new_game(adeck)
     drop.clear
-    on_table.clear
+    field.clear
     hand.clear
     deck.clear
     deck.concat(adeck.data.map{|c| GameCard.new(c)})
     deck.shuffle!
     deck.each &.reset
-    5.times { draw_card }
+    10.times { draw_card }
+    hand.sample(6).each{|c| play_card(c)}
+    field.sample(2).each{|c| drop_card(c)}
   end
 
   def draw_card
@@ -51,6 +55,19 @@ class TableSide
     card = deck.pop
     card.state = CardState::Hand
     @data[CardState::Hand] << card
+  end
+
+  def play_card(card)
+    hand.delete(card)
+    card.state = CardState::Field
+    @data[CardState::Field] << card
+  end
+
+  def drop_card(card)
+    hand.delete(card)
+    field.delete(card)
+    card.state = CardState::Drop
+    @data[CardState::Drop] << card
   end
 
 end

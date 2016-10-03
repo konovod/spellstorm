@@ -5,6 +5,20 @@ module Spellstorm
 CARD_WIDTH = 120
 CARD_HEIGHT = 160
 
+CARD_POS = {
+  CardState::Deck => vec(10,10),
+  CardState::Hand => vec(Engine::SCREENX / 2, 50),
+  CardState::Field => vec(20, Engine::SCREENY / 2 - CARD_WIDTH - 10),
+  CardState::Drop => vec(Engine::SCREENX-CARD_WIDTH-10, 10),
+}
+CARD_DELTA = {
+  CardState::Deck => vec(5,5),
+  CardState::Hand =>  vec(20, 5),
+  CardState::Field =>  vec(70, 0),
+  CardState::Drop =>  vec(20, 0),
+}
+
+
 enum Player
   First
   Second
