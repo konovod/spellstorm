@@ -12,6 +12,12 @@ module Spellstorm
     getter table
 
     def on_mouse(event, x, y)
+      return if event.is_a? SF::Event::MouseMoved
+      if @cur_player == Player::First
+        @cur_player = Player::Second
+      else
+        @cur_player = Player::First
+      end
 
     end
 
@@ -21,7 +27,7 @@ module Spellstorm
 
     def draw
         #@window.draw(@back)
-        @table.draw(@window, SF::RenderStates.new, Player::First)
+        @table.draw(@window, SF::RenderStates.new, @cur_player)
         @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
         @window.draw(@fps_label)
     end
@@ -45,6 +51,7 @@ module Spellstorm
       @table = Table.new
 
       @back = Engine::Background.new(self, Engine::Tex["water.jpg"])
+      @cur_player = Player::First
     end
 
     def run

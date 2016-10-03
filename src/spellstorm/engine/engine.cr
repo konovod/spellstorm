@@ -39,7 +39,7 @@ module Engine
     abstract def process
 
     def initialize
-      @window = SF::RenderWindow.new(SF::VideoMode.new(800, 600), "My window")
+      @window = SF::RenderWindow.new(SF::VideoMode.new(SCREENX, SCREENY), "My window")
       @window.vertical_sync_enabled = true
       #@window.framerate_limit = 60
       @quitting = false

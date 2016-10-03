@@ -1,7 +1,7 @@
 module Engine
 
-  SCREENX = 800
-  SCREENY = 600
+  SCREENX = 1024
+  SCREENY = 768
   PHYS_DT = 1.0/60
 
 end

@@ -65,8 +65,9 @@ class Table
 
   def draw(target, states, cur_player)
       @sides[Player::First].draw(target, states, cur_player == Player::First)
-      #states.transform.scale(0,-1)
-      states.transform.rotate(10)
+      #states.transform.rotate(45)
+      states.transform.translate({0, Engine::SCREENY})
+      states.transform.scale({1,-1})
       @sides[Player::Second].draw(target, states, cur_player == Player::Second)
   end
 
