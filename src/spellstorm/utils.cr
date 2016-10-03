@@ -2,23 +2,25 @@ module Spellstorm
   CARD_WIDTH  = 120
   CARD_HEIGHT = 160
 
+  Y0 = Engine::SCREENY - CARD_HEIGHT
+
   CARD_COORDS = {
     CardState::Deck  => {
-      pos: vec(10, 10),
+      pos: vec(10, Y0-10),
       delta: vec(5, 5),
       angle0: 0.0, dangle: 0.0},
     CardState::Hand  => {
-      pos: vec(350, 10),
-      delta: vec(20, 5),
-      angle0: 0.0, dangle: 0.0},
+      pos: vec(350, Y0-10),
+      delta: vec(80, 0),
+      angle0: -20.0, dangle: 5.0},
     CardState::Field => {
-      pos: vec(20, Engine::SCREENY / 2 - CARD_WIDTH - 10),
-      delta: vec(70, 0),
+      pos: vec(10, Y0- CARD_HEIGHT - 20),
+      delta: vec(CARD_WIDTH+5, 0),
       angle0: 0.0, dangle: 0.0},
     CardState::Drop  => {
-      pos: vec(CARD_WIDTH + 50, 10),
+      pos: vec(CARD_WIDTH + 50, Y0-10),
       delta: vec(0, 0),
-      angle0: 0.0, dangle: 0.0},
+      angle0: 90.0, dangle: 0.0},
   }
 
   enum Player
