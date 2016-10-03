@@ -1,9 +1,7 @@
 require "./engine/*"
 require "./utils.cr"
 
-
 module Spellstorm
-
   enum CardState
     Deck
     Hand
@@ -19,18 +17,17 @@ module Spellstorm
     Air
   end
 
+  abstract class Card
+    property cost : Int32
+    property element : Element
+    property power : Int32
+    property name : String
 
-    abstract class Card
-      property cost : Int32
-      property element : Element
-      property power : Int32
-      property name : String
+    abstract def typ_name : String
 
-      abstract def typ_name : String
-
-      def initialize(@name, @cost, @element, @power)
-      end
+    def initialize(@name, @cost, @element, @power)
     end
+  end
 
   class GameCard
     @elements : Array(SF::Drawable)
@@ -40,14 +37,14 @@ module Spellstorm
     def initialize(@card)
       @state = CardState::Deck
       label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @card.name,
-            size: 12, color: SF::Color::Black, centered: true)
+        size: 12, color: SF::Color::Black, centered: true)
       label_cost = new_text(10, 10, @card.cost.to_s,
-            size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
-      label_power = new_text(CARD_WIDTH-10, 10, @card.power.to_s,
-            size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
+        size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
+      label_power = new_text(CARD_WIDTH - 10, 10, @card.power.to_s,
+        size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
 
       frame = SF::RectangleShape.new(vec(CARD_WIDTH, CARD_HEIGHT))
-      #frame.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
+      # frame.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
       frame.outline_color = SF::Color::Black
       frame.fill_color = SF::Color::White
       frame.outline_thickness = 2
@@ -58,15 +55,15 @@ module Spellstorm
       @back.outline_thickness = 2
 
       @elements = [] of SF::Drawable
-      @elements<<frame
-      @elements<<label_name
-      @elements<<label_cost
-      @elements<<label_power
+      @elements << frame
+      @elements << label_name
+      @elements << label_cost
+      @elements << label_power
     end
 
     def calc_pos(state, index)
-      return CARD_POS[state]+CARD_DELTA[state]*index
-#      result = vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
+      return CARD_POS[state] + CARD_DELTA[state]*index
+      #      result = vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
     end
 
     def reset
@@ -79,7 +76,7 @@ module Spellstorm
       if open
         @elements.each &.draw(target, states)
       else
-        #@elements.first.draw(target, states)
+        # @elements.first.draw(target, states)
         @back.draw(target, states)
       end
     end
@@ -90,7 +87,5 @@ module Spellstorm
 
       draw(target, states, apos, 0, open)
     end
-
   end
-
 end

@@ -4,7 +4,6 @@ require "./cards/*"
 require "./utils.cr"
 
 module Spellstorm
-
   class SpellstormGame < Engine::Game
     @fps_label : SF::Text
     getter cards_db
@@ -18,7 +17,6 @@ module Spellstorm
       else
         @cur_player = Player::First
       end
-
     end
 
     def on_key(event : SF::Event::KeyEvent, key)
@@ -26,14 +24,13 @@ module Spellstorm
     end
 
     def draw
-        #@window.draw(@back)
-        @table.draw(@window, SF::RenderStates.new, @cur_player)
-        @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
-        @window.draw(@fps_label)
+      # @window.draw(@back)
+      @table.draw(@window, SF::RenderStates.new, @cur_player)
+      @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
+      @window.draw(@fps_label)
     end
 
     def process
-
     end
 
     def new_game
@@ -44,9 +41,9 @@ module Spellstorm
     def initialize
       super
 
-      @fps_label = new_text(0,0,"FPS, UPS = 0123456789", size:24, color: SF::Color::Red)
+      @fps_label = new_text(0, 0, "FPS, UPS = 0123456789", size: 24, color: SF::Color::Red)
 
-      CardsDB.instance #forcing init
+      CardsDB.instance # forcing init
       @decks = {Deck.new, Deck.new}
       @table = Table.new
 
@@ -58,7 +55,5 @@ module Spellstorm
       new_game
       super
     end
-
   end
-
 end

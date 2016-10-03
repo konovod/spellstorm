@@ -1,45 +1,33 @@
 require "../cards.cr"
 
 module Spellstorm
-
-class ShieldCard < Card
-
-  def typ_name : String
-    "Щит"
+  class ShieldCard < Card
+    def typ_name : String
+      "Щит"
+    end
   end
 
-end
-
-class DangerCard < Card
-
-  def typ_name : String
-    "Угроза"
+  class DangerCard < Card
+    def typ_name : String
+      "Угроза"
+    end
   end
 
-end
-
-class ActionCard < Card
-
-  def typ_name : String
-    "Действие"
+  class ActionCard < Card
+    def typ_name : String
+      "Действие"
+    end
   end
 
-end
-
-class EnchantCard < Card
-
-  def typ_name : String
-    "Чары"
+  class EnchantCard < Card
+    def typ_name : String
+      "Чары"
+    end
   end
 
-end
-
-class SourceCard < Card
-
-  def typ_name : String
-    "Накопитель"
+  class SourceCard < Card
+    def typ_name : String
+      "Накопитель"
+    end
   end
-
-end
-
 end

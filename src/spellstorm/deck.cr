@@ -2,7 +2,6 @@ require "./cards/*"
 require "./utils.cr"
 
 module Spellstorm
-
   class Deck
     getter data : Array(Card)
 
@@ -15,8 +14,5 @@ module Spellstorm
         @data << CardsDB.instance.sample
       end
     end
-
   end
-
-
 end

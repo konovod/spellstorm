@@ -1,16 +1,15 @@
 require "crsfml/crsfml.cr"
 require "../config.cr"
 
-#TODO - ugly
+# TODO - ugly
 
 alias MyVec = SF::Vector2(Float32)
+
 def vec(x, y)
   MyVec.new(Float32.new(x), Float32.new(y))
 end
 
 module Engine
-
-
   class GameObject
     property dead : Bool
     property pos : MyVec
@@ -26,7 +25,6 @@ module Engine
 
     def draw(target : SF::RenderTarget)
     end
-
   end
 
   abstract class Game
@@ -41,7 +39,7 @@ module Engine
     def initialize
       @window = SF::RenderWindow.new(SF::VideoMode.new(SCREENX, SCREENY), "My window")
       @window.vertical_sync_enabled = true
-      #@window.framerate_limit = 60
+      # @window.framerate_limit = 60
       @quitting = false
       @objects = Array(GameObject).new
       @phys_timer = SF::Clock.new
@@ -56,7 +54,7 @@ module Engine
     end
 
     private def do_draw
-      @cur_fps+=1
+      @cur_fps += 1
       @objects.each do |obj|
         obj.draw(@window)
       end
@@ -64,7 +62,7 @@ module Engine
     end
 
     private def do_process
-      @cur_ups+=1
+      @cur_ups += 1
       @objects.each do |obj|
         obj.process
       end
@@ -107,8 +105,5 @@ module Engine
       end
       @window.close
     end
-
   end
-
-
 end
