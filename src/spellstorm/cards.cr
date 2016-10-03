@@ -19,25 +19,18 @@ module Spellstorm
     Air
   end
 
-  abstract class Card
+  class GameCard
     @elements : Array(SF::Drawable)
+    @card : Card
     property state
 
-    property cost : Int32
-    property element : Element
-    property power : Int32
-    property name : String
-
-    abstract def typ_name : String
-
-    def initialize(@name, @cost, @element, @power)
+    def initialize(@card)
       @state = CardState::Deck
-
-      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @name,
+      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @card.name,
             size: 12, color: SF::Color::Black, centered: true)
-      label_cost = new_text(10, 10, @cost.to_s,
+      label_cost = new_text(10, 10, @card.cost.to_s,
             size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
-      label_power = new_text(CARD_WIDTH-10, 10, @cost.to_s,
+      label_power = new_text(CARD_WIDTH-10, 10, @card.power.to_s,
             size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
 
 
@@ -52,11 +45,14 @@ module Spellstorm
       @elements<<label_name
       @elements<<label_cost
       @elements<<label_power
-
     end
 
     def update_pos(state, index)
       return vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
+    end
+
+    def reset
+      @state = CardState::Deck
     end
 
     def draw(target : SF::RenderTarget, states : SF::RenderStates, index : Int32, open : Bool = true)
@@ -68,12 +64,18 @@ module Spellstorm
       end
     end
 
-    def reset
-      @state = CardState::Deck
+  end
+
+  abstract class Card
+    property cost : Int32
+    property element : Element
+    property power : Int32
+    property name : String
+
+    abstract def typ_name : String
+
+    def initialize(@name, @cost, @element, @power)
     end
-
-
-
   end
 
 end

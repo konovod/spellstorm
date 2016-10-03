@@ -5,9 +5,9 @@ module Spellstorm
 
 class TableSide
   def initialize (player)
-    @data = Hash(CardState, Array(Card)).new
+    @data = Hash(CardState, Array(GameCard)).new
     CardState.values.each do |p|
-      @data[p] = Array(Card).new
+      @data[p] = Array(GameCard).new
     end
   end
 
@@ -40,7 +40,8 @@ class TableSide
     on_table.clear
     hand.clear
     deck.clear
-    deck.concat adeck.data.shuffle
+    deck.concat(adeck.data.map{|c| GameCard.new(c)})
+    deck.shuffle!
     deck.each &.reset
     5.times { draw_card }
   end
@@ -66,9 +67,6 @@ class Table
 
   def draw(target, states, cur_player)
       @sides[Player::First].draw(target, states, cur_player == Player::First)
-      #states.transform.rotate(45)
-      states.transform.translate({0, Engine::SCREENY})
-      states.transform.scale({1,-1})
       @sides[Player::Second].draw(target, states, cur_player == Player::Second)
   end
 
