@@ -47,6 +47,33 @@ module Spellstorm
     end
   end
 
+  class CardAnimation
+    getter cur_pos : CardPos
+    getter counter : Int32
+
+    def initialize(@card, @start, @end)
+      @cur_pos = @start
+      length = [(@end.pos.x - @start.pos.x).abs, (@end.pos.y - @start.pos.y).abs].max
+      @counter = length / 10
+      @step = CardPos.new(
+            (@end.pos - @start.pos) / @counter,
+            (@end.angle - @start.angle) / @counter
+            )
+    end
+
+    def one_step
+      @cur_pos.pos += @step.pos
+      @cur_pos.angle += @step.angle
+      @counter -= 1
+      return @counter <= 0
+    end
+
+    def draw(target : SF::RenderTarget, states : SF::RenderStates, open : Bool)
+      @card.draw(target, @cur_pos.apply(states), open)
+    end
+
+  end
+
   class GameCard
     @elements : Array(SF::Drawable)
     @card : Card
