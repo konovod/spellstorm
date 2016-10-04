@@ -30,7 +30,7 @@ module Spellstorm
   end
 
   struct CardPos
-    @pos : MyVec
+    getter pos : MyVec
     @angle : Float64
 
     def initialize(@pos, @angle)
@@ -75,7 +75,7 @@ module Spellstorm
 
   class GameCard
     @elements : Array(SF::Drawable)
-    @card : Card
+    getter card : Card
     @reverted : Bool
     @back : SF::Drawable
     property state

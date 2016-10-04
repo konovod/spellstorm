@@ -30,12 +30,25 @@ module Spellstorm
       @data[CardState::Drop]
     end
 
+    def all_cards
+      @data.values.each &.each { |card| yield card }
+    end
+
     def update_indices
       @data.values.each &.each_with_index { |card, i| card.index = i; card.pos = card.calc_pos }
     end
 
     def draw(target, states)
-      @data.values.each &.each { |card| card.draw(target, states) }
+      all_cards &.draw(target, states)
+    end
+
+    def find_card(x,y, **args)
+      all_cards { |card|
+        if SF.float_rect(card.pos.pos.x,card.pos.pos.y,CARD_WIDTH, CARD_HEIGHT).contains?(x,y)
+          return card
+        end
+      }
+      nil
     end
 
     def new_game(adeck)
@@ -92,5 +105,16 @@ module Spellstorm
         @sides[p].new_game(d)
       end
     end
+
+    #will contain additional constraints
+    def find_card(x,y, **args)
+      @sides.values.each do |v|
+        if c = v.find_card(x,y, **args)
+          return c
+        end
+      end
+      nil
+    end
+
   end
 end

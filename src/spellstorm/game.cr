@@ -12,11 +12,9 @@ module Spellstorm
 
     def on_mouse(event, x, y)
       return if event.is_a? SF::Event::MouseMoved
-      if @cur_player == Player::First
-        @cur_player = Player::Second
-      else
-        @cur_player = Player::First
-      end
+      card = @table.find_card(x,y)
+      p card.card.name if card
+
     end
 
     def on_key(event : SF::Event::KeyEvent, key)
