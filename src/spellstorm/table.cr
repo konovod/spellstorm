@@ -34,7 +34,7 @@ module Spellstorm
       drop.last(3).each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
       field.each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
       hand.each_with_index { |card, i| card.draw(target, states, i, @reverted, my_turn) }
-      deck.first.draw(target, states, 0, @reverted, false) unless deck.empty?
+      deck.first(4).each_with_index { |card, i| card.draw(target, states, i, @reverted, false) }
     end
 
     def new_game(adeck)

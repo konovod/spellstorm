@@ -40,7 +40,7 @@ module Spellstorm
       return states
     end
     def invert
-      @pos.y = Engine::SCREENY - CARD_HEIGHT - @pos.y
+      @pos.y = Y0 - @pos.y - 100
     end
 end
 
@@ -52,7 +52,7 @@ end
     def initialize(@card)
       @state = CardState::Deck
       label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @card.name,
-        size: 12, color: SF::Color::Black, centered: true)
+        size: 16, color: SF::Color::Black, centered: true)
       label_cost = new_text(10, 10, @card.cost.to_s,
         size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
       label_power = new_text(CARD_WIDTH - 10, 10, @card.power.to_s,
@@ -68,6 +68,7 @@ end
       @back.texture = Engine::Tex["grass.png"]
       @back.outline_color = SF::Color::Black
       @back.outline_thickness = 2
+      #@back.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
 
       @elements = [] of SF::Drawable
       @elements << frame
