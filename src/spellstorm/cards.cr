@@ -32,17 +32,20 @@ module Spellstorm
   struct CardPos
     @pos : MyVec
     @angle : Float64
+
     def initialize(@pos, @angle)
     end
+
     def apply(states)
       states.transform.translate(@pos)
       states.transform.rotate(@angle)
       return states
     end
+
     def invert
       @pos.y = Y0 - @pos.y - 100
     end
-end
+  end
 
   class GameCard
     @elements : Array(SF::Drawable)
@@ -68,7 +71,7 @@ end
       @back.texture = Engine::Tex["grass.png"]
       @back.outline_color = SF::Color::Black
       @back.outline_thickness = 2
-      #@back.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
+      # @back.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
 
       @elements = [] of SF::Drawable
       @elements << frame
@@ -79,7 +82,7 @@ end
 
     def calc_pos(state, index)
       base = CARD_COORDS[state]
-      return CardPos.new(base[:pos] + base[:delta]*index, base[:angle0]+base[:dangle]*index)
+      return CardPos.new(base[:pos] + base[:delta]*index, base[:angle0] + base[:dangle]*index)
       #      result = vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
     end
 
@@ -87,7 +90,7 @@ end
       @state = CardState::Deck
     end
 
-    def draw(target : SF::RenderTarget, states : SF::RenderStates,  open : Bool)
+    def draw(target : SF::RenderTarget, states : SF::RenderStates, open : Bool)
       if open
         @elements.each &.draw(target, states)
       else
