@@ -30,8 +30,8 @@ module Spellstorm
   end
 
   struct CardPos
-    getter pos : MyVec
-    @angle : Float64
+    property pos : MyVec
+    property angle : Float64
 
     def initialize(@pos, @angle)
     end
@@ -50,11 +50,12 @@ module Spellstorm
   class CardAnimation
     getter cur_pos : CardPos
     getter counter : Int32
+    getter card : GameCard
 
-    def initialize(@card, @start, @end)
+    def initialize(@card, @start : CardPos, @end : CardPos)
       @cur_pos = @start
       length = [(@end.pos.x - @start.pos.x).abs, (@end.pos.y - @start.pos.y).abs].max
-      @counter = length / 10
+      @counter = (length / 10).to_i
       @step = CardPos.new(
         (@end.pos - @start.pos) / @counter,
         (@end.angle - @start.angle) / @counter
@@ -68,9 +69,16 @@ module Spellstorm
       return @counter <= 0
     end
 
-    def draw(target : SF::RenderTarget, states : SF::RenderStates, open : Bool)
-      @card.draw(target, @cur_pos.apply(states), open)
+    def process
+      f = one_step
+      if f
+        @card.pos = @end
+      else
+        @card.pos = @cur_pos
+      end
+      f
     end
+
   end
 
   class GameCard

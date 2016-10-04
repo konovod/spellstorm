@@ -4,8 +4,9 @@ require "./engine/*"
 module Spellstorm
   class TableSide
     @reverted : Bool
+    @table : Table
 
-    def initialize(player)
+    def initialize(@table, player)
       @reverted = player == Player::Second
       @data = Hash(CardState, Array(GameCard)).new
       CardState.values.each do |p|
@@ -36,6 +37,7 @@ module Spellstorm
 
     def update_indices
       @data.values.each &.each_with_index { |card, i| card.index = i; card.pos = card.calc_pos }
+      @table.animations.clear
     end
 
     def draw(target, states)
@@ -71,6 +73,7 @@ module Spellstorm
       card.state = CardState::Hand
       card.open = true unless @reverted
       @data[CardState::Hand] << card
+      @table.animate card
     end
 
     def play_card(card)
@@ -78,6 +81,7 @@ module Spellstorm
       card.state = CardState::Field
       card.open = true
       @data[CardState::Field] << card
+      @table.animate card
     end
 
     def drop_card(card)
@@ -85,14 +89,18 @@ module Spellstorm
       field.delete(card)
       card.state = CardState::Drop
       @data[CardState::Drop] << card
+      @table.animate card
     end
   end
 
   class Table
+    getter animations
+    getter sides
     def initialize
+      @animations = Array(CardAnimation).new
       @sides = Hash(Player, TableSide).new
       Player.values.each do |p|
-        @sides[p] = TableSide.new(p)
+        @sides[p] = TableSide.new(self, p)
       end
     end
 
@@ -114,6 +122,19 @@ module Spellstorm
         end
       end
       nil
+    end
+
+    def animate(card)
+      animate(card, card.pos, card.calc_pos)
+    end
+
+    def animate(card, oldpos, newpos)
+      @animations.reject!{|x| x.card == card}
+      @animations << CardAnimation.new(card, oldpos, newpos)
+    end
+
+    def process_animations
+      @animations.reject! &.process
     end
 
   end

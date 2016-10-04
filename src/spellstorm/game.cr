@@ -12,8 +12,12 @@ module Spellstorm
 
     def on_mouse(event, x, y)
       return if event.is_a? SF::Event::MouseMoved
-      card = @table.find_card(x,y)
-      p card.card.name if card
+      side = @table.sides[Player::First]
+      card = side.find_card(x,y)
+      if card
+        p card.card.name
+        side.drop_card(card)
+      end
 
     end
 
@@ -29,6 +33,7 @@ module Spellstorm
     end
 
     def process
+      @table.process_animations
     end
 
     def new_game
