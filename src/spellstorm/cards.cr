@@ -56,9 +56,9 @@ module Spellstorm
       length = [(@end.pos.x - @start.pos.x).abs, (@end.pos.y - @start.pos.y).abs].max
       @counter = length / 10
       @step = CardPos.new(
-            (@end.pos - @start.pos) / @counter,
-            (@end.angle - @start.angle) / @counter
-            )
+        (@end.pos - @start.pos) / @counter,
+        (@end.angle - @start.angle) / @counter
+      )
     end
 
     def one_step
@@ -71,16 +71,24 @@ module Spellstorm
     def draw(target : SF::RenderTarget, states : SF::RenderStates, open : Bool)
       @card.draw(target, @cur_pos.apply(states), open)
     end
-
   end
 
   class GameCard
     @elements : Array(SF::Drawable)
     @card : Card
+    @reverted : Bool
+    @back : SF::Drawable
     property state
+    property index
+    property open
+    property pos : CardPos
 
-    def initialize(@card)
+    def initialize(@card, @reverted)
       @state = CardState::Deck
+      @index = 0
+      @open = false
+      @pos = calc_pos
+
       label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @card.name,
         size: 16, color: SF::Color::Black, centered: true)
       label_cost = new_text(10, 10, @card.cost.to_s,
@@ -88,16 +96,16 @@ module Spellstorm
       label_power = new_text(CARD_WIDTH - 10, 10, @card.power.to_s,
         size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
 
-      frame = SF::RectangleShape.new(vec(CARD_WIDTH, CARD_HEIGHT))
-      # frame.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
-      frame.outline_color = SF::Color::Black
-      frame.fill_color = SF::Color::White
-      frame.outline_thickness = 2
-
-      @back = SF::RectangleShape.new(vec(CARD_WIDTH, CARD_HEIGHT))
-      @back.texture = Engine::Tex["grass.png"]
-      @back.outline_color = SF::Color::Black
-      @back.outline_thickness = 2
+      frame = new_rect(0,0,CARD_WIDTH, CARD_HEIGHT,
+                    outline: SF::Color::Black,
+                    fill: SF::Color::White,
+                    thickness: 2
+                    )
+      @back = new_rect(0,0,CARD_WIDTH, CARD_HEIGHT,
+                    texture: Engine::Tex["grass.png"],
+                    outline: SF::Color::Black,
+                    thickness: 2
+                    )
       # @back.origin = vec(CARD_WIDTH / 2, CARD_HEIGHT / 2)
 
       @elements = [] of SF::Drawable
@@ -105,31 +113,32 @@ module Spellstorm
       @elements << label_name
       @elements << label_cost
       @elements << label_power
+
+    end
+
+    def calc_pos
+      calc_pos(@state, @index)
     end
 
     def calc_pos(state, index)
       base = CARD_COORDS[state]
-      return CardPos.new(base[:pos] + base[:delta]*index, base[:angle0] + base[:dangle]*index)
-      #      result = vec(20+index*(CARD_WIDTH+5),20+state.to_i*(CARD_HEIGHT+10))
+      result = CardPos.new(base[:pos] + base[:delta]*index, base[:angle0] + base[:dangle]*index)
+      result.invert if @reverted
+      return result
     end
 
     def reset
       @state = CardState::Deck
     end
 
-    def draw(target : SF::RenderTarget, states : SF::RenderStates, open : Bool)
+    def draw(target : SF::RenderTarget, states : SF::RenderStates)
+      states = @pos.apply(states)
       if open
         @elements.each &.draw(target, states)
       else
-        # @elements.first.draw(target, states)
         @back.draw(target, states)
       end
     end
 
-    def draw(target : SF::RenderTarget, states : SF::RenderStates, index, reverted, open : Bool)
-      apos = calc_pos(@state, index)
-      apos.invert if reverted
-      draw(target, apos.apply(states), open)
-    end
   end
 end

@@ -7,7 +7,7 @@ module Spellstorm
   CARD_COORDS = {
     CardState::Deck => {
       pos: vec(10, Y0 - 10),
-      delta: vec(5, 5),
+      delta: vec(0, 2),
       angle0: 0.0, dangle: 0.0,
     },
     CardState::Hand => {
@@ -21,7 +21,7 @@ module Spellstorm
       angle0: -20.0, dangle: 5.0,
     },
     CardState::Drop => {
-      pos: vec(Engine::SCREENX, Y0),
+      pos: vec(Engine::SCREENX+CARD_WIDTH*2, Y0),
       delta: vec(0, 0),
       angle0: 90.0, dangle: 5.0,
     },
@@ -45,4 +45,14 @@ def new_text(x, y, str, *, size = 12, color = SF::Color::Black, centered = false
   atext.origin = vec(atext.local_bounds.width/2, atext.local_bounds.height/2) if centered
 
   return atext
+end
+
+def new_rect(x0, y0, width, height, *, thickness = 1, outline = SF::Color::Transparent, fill = SF::Color::Transparent, texture : (SF::Texture | Nil) = nil) : SF::RectangleShape
+  result = SF::RectangleShape.new(vec(width, height))
+  result.position = vec(x0, y0)
+  result.texture = texture if texture
+  result.outline_color = outline unless outline == SF::Color::Transparent
+  result.outline_thickness = thickness
+  result.fill_color = fill unless fill == SF::Color::Transparent
+  return result
 end

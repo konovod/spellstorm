@@ -30,11 +30,12 @@ module Spellstorm
       @data[CardState::Drop]
     end
 
-    def draw(target, states, my_turn)
-      drop.last(3).each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
-      field.each_with_index { |card, i| card.draw(target, states, i, @reverted, true) }
-      hand.each_with_index { |card, i| card.draw(target, states, i, @reverted, my_turn) }
-      deck.first(4).each_with_index { |card, i| card.draw(target, states, i, @reverted, false) }
+    def update_indices
+      @data.values.each &.each_with_index { |card, i| card.index = i; card.pos = card.calc_pos }
+    end
+
+    def draw(target, states)
+      @data.values.each &.each { |card| card.draw(target, states) }
     end
 
     def new_game(adeck)
@@ -42,24 +43,27 @@ module Spellstorm
       field.clear
       hand.clear
       deck.clear
-      deck.concat(adeck.data.map { |c| GameCard.new(c) })
+      deck.concat(adeck.data.map { |c| GameCard.new(c, @reverted) })
       deck.shuffle!
       deck.each &.reset
       10.times { draw_card }
       hand.sample(6).each { |c| play_card(c) }
       field.sample(2).each { |c| drop_card(c) }
+      update_indices
     end
 
     def draw_card
       return if deck.empty?
       card = deck.pop
       card.state = CardState::Hand
+      card.open = true unless @reverted
       @data[CardState::Hand] << card
     end
 
     def play_card(card)
       hand.delete(card)
       card.state = CardState::Field
+      card.open = true
       @data[CardState::Field] << card
     end
 
@@ -80,8 +84,7 @@ module Spellstorm
     end
 
     def draw(target, states, cur_player)
-      @sides[Player::First].draw(target, states, cur_player == Player::First)
-      @sides[Player::Second].draw(target, states, cur_player == Player::Second)
+      @sides.values.each &.draw(target, states)
     end
 
     def new_game(decks)
