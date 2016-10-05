@@ -11,12 +11,18 @@ module Spellstorm
     getter table
 
     def on_mouse(event, x, y)
-      return if event.is_a? SF::Event::MouseMoved
+      return unless event.is_a? SF::Event::MouseButtonReleased
       side = @table.sides[Player::First]
       card = side.find_card(x,y)
       if card
-        p card.card.name
-        side.drop_card(card)
+        #p card.card.name
+        if card.state == CardState::Deck
+          side.draw_card
+        elsif card.state == CardState::Hand
+            side.play_card(card)
+        else
+          side.drop_card(card)
+        end
       end
 
     end

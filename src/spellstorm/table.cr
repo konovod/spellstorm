@@ -36,7 +36,12 @@ module Spellstorm
     end
 
     def update_indices
-      @data.values.each &.each_with_index { |card, i| card.index = i; card.pos = card.calc_pos }
+      @data.values.each &.each_with_index { |card, i| card.index = i }
+    end
+
+    def update_positions
+      update_indices
+      all_cards { |card| card.pos = card.calc_pos }
       @table.animations.clear
     end
 
@@ -64,32 +69,30 @@ module Spellstorm
       10.times { draw_card }
       hand.sample(6).each { |c| play_card(c) }
       field.sample(2).each { |c| drop_card(c) }
-      update_indices
+      update_positions
+    end
+
+    def set_card_state(card, state, open)
+      @data[card.state].delete(card)
+      card.state = state
+      card.open = true if open
+      @data[state] << card
+      card.index = @data[state].size-1
+      @table.animate card
     end
 
     def draw_card
       return if deck.empty?
       card = deck.pop
-      card.state = CardState::Hand
-      card.open = true unless @reverted
-      @data[CardState::Hand] << card
-      @table.animate card
+      set_card_state(card, CardState::Hand, !@reverted)
     end
 
     def play_card(card)
-      hand.delete(card)
-      card.state = CardState::Field
-      card.open = true
-      @data[CardState::Field] << card
-      @table.animate card
+      set_card_state(card, CardState::Field, @reverted)
     end
 
     def drop_card(card)
-      hand.delete(card)
-      field.delete(card)
-      card.state = CardState::Drop
-      @data[CardState::Drop] << card
-      @table.animate card
+      set_card_state(card, CardState::Drop, true)
     end
   end
 
@@ -134,7 +137,11 @@ module Spellstorm
     end
 
     def process_animations
+      was = !@animations.empty?
       @animations.reject! &.process
+      if @animations.empty? && was
+        @sides.values.each &.update_positions
+      end
     end
 
   end

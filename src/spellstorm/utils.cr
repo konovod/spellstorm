@@ -2,6 +2,8 @@ module Spellstorm
   CARD_WIDTH  = 120
   CARD_HEIGHT = 160
 
+  ANIM_SPEED = 20
+
   Y0 = Engine::SCREENY - CARD_HEIGHT
 
   CARD_COORDS = {

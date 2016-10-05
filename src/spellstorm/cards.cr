@@ -55,7 +55,7 @@ module Spellstorm
     def initialize(@card, @start : CardPos, @end : CardPos)
       @cur_pos = @start
       length = [(@end.pos.x - @start.pos.x).abs, (@end.pos.y - @start.pos.y).abs].max
-      @counter = (length / 10).to_i
+      @counter = (length / ANIM_SPEED).to_i
       @step = CardPos.new(
         (@end.pos - @start.pos) / @counter,
         (@end.angle - @start.angle) / @counter
