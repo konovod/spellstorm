@@ -35,32 +35,30 @@ module Spellstorm
       location = CardLocation::Deck
     end
 
-    def move (states, newlocation)
-
+    def move(states, newlocation)
     end
-
   end
 
   class GameState
     property parts
+
     def initialize(decks)
-      @parts = { PlayerState.new(Player::First, decks[0]), PlayerState.new(Player::Second, decks[1]) }
+      @parts = {PlayerState.new(Player::First, decks[0]), PlayerState.new(Player::Second, decks[1])}
       @parts.each &.refill_hand
     end
 
     def card_state(player, card)
       @parts[player.to_i].card_state(card)
     end
-
   end
 
   class PlayerState
     getter hp : Int32
 
     def initialize(@player : Player, @deck : Deck)
-      @data = StaticArray(CardState, DECK_SIZE).new{ |i| CardState.new(@player)}
+      @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(@player) }
       @hp = MAX_HP
-      @counts = StaticArray(Int32, 4).new{ |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0}
+      @counts = StaticArray(Int32, 4).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
     end
 
     def count_cards(location : CardLocation)
@@ -81,10 +79,10 @@ module Spellstorm
     end
 
     def refill_hand
-      in_deck = (0...@data.size).select{ |i| @data[i].location == CardLocation::Deck }#.shuffle!
+      in_deck = (0...@data.size).select { |i| @data[i].location == CardLocation::Deck } # .shuffle!
       needed = @hp - count_cards(CardLocation::Hand)
       if in_deck.size < needed
-        #TODO
+        # TODO
         raise "Out of cards"
       end
       needed.times do
@@ -92,7 +90,6 @@ module Spellstorm
         move_card(card, CardLocation::Hand)
       end
     end
-
   end
 
   abstract class Card

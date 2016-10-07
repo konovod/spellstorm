@@ -1,9 +1,7 @@
 module Spellstorm
-
-  MAX_HP = 5
+  MAX_HP    =  5
   DECK_SIZE = 40
   GAME_SIZE = DECK_SIZE * 2
-
 
   CARD_WIDTH  = 120
   CARD_HEIGHT = 160
@@ -29,7 +27,7 @@ module Spellstorm
       angle0: -20.0, dangle: 5.0,
     },
     CardLocation::Drop => {
-      pos: vec(Engine::SCREENX+CARD_WIDTH*2, Y0),
+      pos: vec(Engine::SCREENX + CARD_WIDTH*2, Y0),
       delta: vec(0, 0),
       angle0: 90.0, dangle: 5.0,
     },

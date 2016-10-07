@@ -16,10 +16,9 @@ module Spellstorm
       end
     end
 
-    #TODO optimization
+    # TODO optimization
     def find(card)
       @data.index(card).not_nil!
     end
-
   end
 end
