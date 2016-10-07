@@ -72,6 +72,9 @@ module Spellstorm
       @game_state = GameState.new(decks)
       @animations = Array(CardAnimation).new
       @drawn_cards = Array(DrawnCard).new
+      decks.each_with_index do |deck, i|
+        @drawn_cards += deck.data.map{|card| DrawnCard.new(card, @game_state, Player.new(i))}
+      end
     end
 
     def update_positions
