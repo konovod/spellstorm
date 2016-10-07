@@ -54,6 +54,7 @@ module Spellstorm
 
       CardsDB.instance # forcing init
       @decks = {Deck.new, Deck.new}
+      @decks.each &.generate
       @table = Table.new(@decks)
 
       @back = Engine::Background.new(self, Engine::Tex["water.jpg"])

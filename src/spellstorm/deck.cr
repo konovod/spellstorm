@@ -10,7 +10,8 @@ module Spellstorm
     end
 
     def generate
-      50.times do
+      @data.clear
+      DECK_SIZE.times do
         @data << CardsDB.instance.sample
       end
     end
