@@ -14,5 +14,11 @@ module Spellstorm
         @data << CardsDB.instance.sample
       end
     end
+
+    #TODO optimization
+    def find(card)
+      @data.index(card).not_nil!
+    end
+
   end
 end

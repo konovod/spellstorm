@@ -12,18 +12,18 @@ module Spellstorm
 
     def on_mouse(event, x, y)
       return unless event.is_a? SF::Event::MouseButtonReleased
-      side = @table.sides[Player::First]
-      card = side.find_card(x,y)
-      if card
-        #p card.card.name
-        if card.state == CardState::Deck
-          side.draw_card
-        elsif card.state == CardState::Hand
-            side.play_card(card)
-        else
-          side.drop_card(card)
-        end
-      end
+      # side = @table.sides[Player::First]
+      # card = side.find_card(x,y)
+      # if card
+      #   #p card.card.name
+      #   if card.state == CardState::Deck
+      #     side.draw_card
+      #   elsif card.state == CardState::Hand
+      #       side.play_card(card)
+      #   else
+      #     side.drop_card(card)
+      #   end
+      # end
 
     end
 
@@ -33,7 +33,7 @@ module Spellstorm
 
     def draw
       # @window.draw(@back)
-      @table.draw(@window, SF::RenderStates.new, @cur_player)
+      @table.draw(@window, SF::RenderStates.new)
       @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
       @window.draw(@fps_label)
     end
@@ -44,7 +44,7 @@ module Spellstorm
 
     def new_game
       @decks.each &.generate
-      @table.new_game(@decks)
+      @table = Table.new(@decks)
     end
 
     def initialize
@@ -54,7 +54,7 @@ module Spellstorm
 
       CardsDB.instance # forcing init
       @decks = {Deck.new, Deck.new}
-      @table = Table.new
+      @table = Table.new(@decks)
 
       @back = Engine::Background.new(self, Engine::Tex["water.jpg"])
       @cur_player = Player::First

@@ -1,78 +1,20 @@
 require "./utils.cr"
 require "./engine/*"
 
+require "./cards.cr"
+require "./visual_cards.cr"
+
 module Spellstorm
-  class TableSide
-    @reverted : Bool
-    @table : Table
 
-    def initialize(@table, player)
-      @reverted = player == Player::Second
-      @data = Hash(CardState, Array(GameCard)).new
-      CardState.values.each do |p|
-        @data[p] = Array(GameCard).new
-      end
+  abstract class Action
+    abstract def perform(state : GameState)
+    abstract def visualize(table : Table)
+
+    def initialize(@player : Player)
+
     end
 
-    # todo - macroses
-    def deck
-      @data[CardState::Deck]
-    end
-
-    def hand
-      @data[CardState::Hand]
-    end
-
-    def field
-      @data[CardState::Field]
-    end
-
-    def drop
-      @data[CardState::Drop]
-    end
-
-    def all_cards
-      @data.values.each &.each { |card| yield card }
-    end
-
-    def update_indices
-      @data.values.each &.each_with_index { |card, i| card.index = i }
-    end
-
-    def update_positions
-      update_indices
-      all_cards { |card| card.pos = card.calc_pos }
-      @table.animations.clear
-    end
-
-    def draw(target, states)
-      all_cards &.draw(target, states)
-    end
-
-    def find_card(x,y, **args)
-      all_cards { |card|
-        if SF.float_rect(card.pos.pos.x,card.pos.pos.y,CARD_WIDTH, CARD_HEIGHT).contains?(x,y)
-          return card
-        end
-      }
-      nil
-    end
-
-    def new_game(adeck)
-      drop.clear
-      field.clear
-      hand.clear
-      deck.clear
-      deck.concat(adeck.data.map { |c| GameCard.new(c, @reverted) })
-      deck.shuffle!
-      deck.each &.reset
-      10.times { draw_card }
-      hand.sample(6).each { |c| play_card(c) }
-      field.sample(2).each { |c| drop_card(c) }
-      update_positions
-    end
-
-    def set_card_state(card, state, open)
+    def set_card_state(table, card, state, open)
       @data[card.state].delete(card)
       card.state = state
       card.open = true if open
@@ -80,41 +22,74 @@ module Spellstorm
       card.index = @data[state].size-1
       @table.animate card
     end
-
-    def draw_card
-      return if deck.empty?
-      card = deck.pop
-      set_card_state(card, CardState::Hand, !@reverted)
-    end
-
-    def play_card(card)
-      set_card_state(card, CardState::Field, @reverted)
-    end
-
-    def drop_card(card)
-      set_card_state(card, CardState::Drop, true)
-    end
   end
+
+  class ActionDraw < Action
+
+    def perform(state : GameState)
+
+    end
+
+    def visualize(table : Table)
+
+    end
+
+  end
+
+
+    # def new_game(adeck)
+    #   drop.clear
+    #   field.clear
+    #   hand.clear
+    #   deck.clear
+    #   deck.concat(adeck.data.map { |c| DrawnCard.new(c, @reverted) })
+    #   deck.shuffle!
+    #   deck.each &.reset
+    #   10.times { draw_card }
+    #   hand.sample(6).each { |c| play_card(c) }
+    #   field.sample(2).each { |c| drop_card(c) }
+    #   update_positions
+    # end
+
+    # def draw_card
+    #   return if deck.empty?
+    #   card = deck.pop
+    #   set_card_state(card, CardState::Hand, !@reverted)
+    # end
+    #
+    # def play_card(card)
+    #   set_card_state(card, CardState::Field, @reverted)
+    # end
+    #
+    # def drop_card(card)
+    #   set_card_state(card, CardState::Drop, true)
+    # end
 
   class Table
     getter animations
-    getter sides
-    def initialize
+    property game_state : GameState
+    def initialize(decks)
+      @game_state = GameState.new(decks)
       @animations = Array(CardAnimation).new
-      @sides = Hash(Player, TableSide).new
-      Player.values.each do |p|
-        @sides[p] = TableSide.new(self, p)
-      end
+      @drawn_cards = Array(DrawnCard).new
     end
 
-    def draw(target, states, cur_player)
-      @sides.values.each &.draw(target, states)
+    def update_positions
+      @drawn_cards.each { |card| card.pos = card.calc_pos }
+      @animations.clear
     end
 
-    def new_game(decks)
-      Player.values.zip(decks.to_a).each do |p, d|
-        @sides[p].new_game(d)
-      end
+    def draw(target, states)
+      @drawn_cards.each &.draw(target, states)
+    end
+
+    def find_card(x,y, **args)
+      @drawn_cards.each { |card|
+        if SF.float_rect(card.pos.pos.x,card.pos.pos.y,CARD_WIDTH, CARD_HEIGHT).contains?(x,y)
+          return card
+        end
+      }
+      nil
     end
 
     #will contain additional constraints
@@ -140,7 +115,7 @@ module Spellstorm
       was = !@animations.empty?
       @animations.reject! &.process
       if @animations.empty? && was
-        @sides.values.each &.update_positions
+        update_positions
       end
     end
 

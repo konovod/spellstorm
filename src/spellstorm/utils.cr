@@ -1,4 +1,10 @@
 module Spellstorm
+
+  MAX_HP = 5
+  DECK_SIZE = 40
+  GAME_SIZE = DECK_SIZE * 2
+
+
   CARD_WIDTH  = 120
   CARD_HEIGHT = 160
 
@@ -7,22 +13,22 @@ module Spellstorm
   Y0 = Engine::SCREENY - CARD_HEIGHT
 
   CARD_COORDS = {
-    CardState::Deck => {
+    CardLocation::Deck => {
       pos: vec(10, Y0 - 10),
       delta: vec(0, 2),
       angle0: 0.0, dangle: 0.0,
     },
-    CardState::Hand => {
+    CardLocation::Hand => {
       pos: vec(CARD_WIDTH + 35, Y0 - 10),
       delta: vec(CARD_WIDTH + 5, 0),
       angle0: 0.0, dangle: 0.0,
     },
-    CardState::Field => {
+    CardLocation::Field => {
       pos: vec(10, Y0 - CARD_HEIGHT - 50),
       delta: vec(CARD_WIDTH + 5, 0),
       angle0: -20.0, dangle: 5.0,
     },
-    CardState::Drop => {
+    CardLocation::Drop => {
       pos: vec(Engine::SCREENX+CARD_WIDTH*2, Y0),
       delta: vec(0, 0),
       angle0: 90.0, dangle: 5.0,
