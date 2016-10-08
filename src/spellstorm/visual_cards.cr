@@ -60,6 +60,7 @@ module Spellstorm
     getter card_index : CardIndex
     property open
     property pos : CardPos
+    getter player : Player
 
     def my_state : CardState
       @states.card_state(@player, @card_index)
@@ -73,7 +74,7 @@ module Spellstorm
       my_state.index # TODO
     end
 
-    def initialize(@card_index, @states : GameState, @deck : Deck, @player : Player)
+    def initialize(@card_index, @states : GameState, @deck : Deck, @player)
       @open = false
       starty = @player == Player::First ? Y0 - 100 : 100
       @pos = CardPos.new(vec(Engine::SCREENX / 2, starty), 0.0)
@@ -137,6 +138,10 @@ module Spellstorm
       else
         @back.draw(target, sf_states)
       end
+    end
+
+    def draw_big(target : SF::RenderTarget, sf_states : SF::RenderStates)
+      @elements.each &.draw(target, sf_states)
     end
 
     def draw_checkbox(target : SF::RenderTarget, sf_states : SF::RenderStates, checkbox)

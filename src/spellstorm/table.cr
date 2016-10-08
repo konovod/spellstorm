@@ -101,6 +101,9 @@ module Spellstorm
       @drawn_cards.each &.draw(target, states)
       if sel = @selected_card
         sel.draw(target, states)
+        states.transform.translate INFO_X, INFO_Y
+        states.transform.scale INFO_SCALE, INFO_SCALE
+        sel.draw_big(target, states)
       end
     end
 
@@ -109,7 +112,7 @@ module Spellstorm
       states = SF::RenderStates.new
       @drawn_cards.each_with_index do |card, index|
         # TODO - more then 254 cards
-        card_color = SF::Color.new(index + 1, 0, 0)
+        card_color = SF::Color.new(card.player.to_i + 1, card.card_index, 0, 255)
         @checkbox.outline_color = card_color
         @checkbox.fill_color = card_color
         card.draw_checkbox(@check_texture, states, @checkbox)
@@ -123,9 +126,11 @@ module Spellstorm
 
     def find_card(x, y)
       color = @check_image.get_pixel(x, y)
-      index = color.r
-      return nil if index == 0 || index > @drawn_cards.size
-      @drawn_cards[index - 1]
+      pl = color.r
+      index = color.g
+      return nil if pl == 0
+      player = Player.new(-1 + pl)
+      @drawn_cards.find { |dcard| dcard.card_index == index && dcard.player == player }
     end
 
     def animate(card)
