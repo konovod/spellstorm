@@ -1,2 +1,2 @@
 require "spec"
-require "../src/spellstorm"
+require "../src/spellstorm/*"
