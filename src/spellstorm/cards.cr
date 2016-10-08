@@ -43,7 +43,7 @@ module Spellstorm
       states.counts[location.to_i] -= 1
       result.location = newlocation
       result.index = states.count_cards(newlocation)
-      states.counts[location.to_i] -= 1
+      states.counts[newlocation.to_i] += 1
       result
     end
 
