@@ -57,26 +57,31 @@ module Spellstorm
   class DrawnCard
     @elements : Array(SF::Drawable)
     @back : SF::Drawable
-    getter card : Card
+    getter card_index : CardIndex
     property open
     property pos : CardPos
 
     def my_state : CardState
-      @states.card_state(@player, @card)
+      @states.card_state(@player, @card_index)
+    end
+
+    def card
+      @deck.data[@card_index]
     end
 
     def visual_index
-      0 # TODO
+      my_state.index # TODO
     end
 
-    def initialize(@card, @states : GameState, @player : Player)
+    def initialize(@card_index, @states : GameState, @deck : Deck, @player : Player)
       @open = false
-      @pos = calc_pos
-      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, @card.name,
+      @pos = CardPos.new(vec(Engine::SCREENX / 2, Engine::SCREENY / 2), 0.0)
+      acard = @deck.data[@card_index]
+      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, acard.name,
         size: 16, color: SF::Color::Black, centered: true)
-      label_cost = new_text(10, 10, @card.cost.to_s,
+      label_cost = new_text(10, 10, acard.cost.to_s,
         size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
-      label_power = new_text(CARD_WIDTH - 10, 10, @card.power.to_s,
+      label_power = new_text(CARD_WIDTH - 10, 10, acard.power.to_s,
         size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)
 
       frame = new_rect(0, 0, CARD_WIDTH, CARD_HEIGHT,
@@ -100,6 +105,17 @@ module Spellstorm
 
     def calc_pos
       calc_pos(my_state.location, visual_index)
+    end
+
+    def should_open
+      case @player
+      when Player::First
+        my_state.location > CardLocation::Deck
+      when Player::Second
+        my_state.location > CardLocation::Hand
+      else
+        true
+      end
     end
 
     def reverted

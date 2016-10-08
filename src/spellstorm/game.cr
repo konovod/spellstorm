@@ -12,6 +12,7 @@ module Spellstorm
 
     def on_mouse(event, x, y)
       return unless event.is_a? SF::Event::MouseButtonReleased
+      @table.check_positions
       # side = @table.sides[Player::First]
       # card = side.find_card(x,y)
       # if card
@@ -62,7 +63,7 @@ module Spellstorm
     end
 
     def run
-      new_game
+      # new_game
       super
     end
   end

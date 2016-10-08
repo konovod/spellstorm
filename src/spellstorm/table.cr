@@ -12,7 +12,7 @@ module Spellstorm
     def initialize(@player : Player)
     end
 
-    def set_card_state(table, card, state, open)
+    def set_card_state(table, card_index, state, open)
       @data[card.state].delete(card)
       card.state = state
       card.open = true if open
@@ -65,15 +65,27 @@ module Spellstorm
     def initialize(decks)
       @game_state = GameState.new(decks)
       @animations = Array(CardAnimation).new
-      @drawn_cards = Array(DrawnCard).new
-      decks.each_with_index do |deck, i|
-        @drawn_cards += deck.data.map { |card| DrawnCard.new(card, @game_state, Player.new(i)) }
+      @drawn_cards = Array(DrawnCard).new(DECK_SIZE*2)
+      Player.values.each do |pl|
+        DECK_SIZE.times do |i|
+          @drawn_cards << DrawnCard.new(i, @game_state, decks[pl.to_i], pl)
+        end
       end
     end
 
     def update_positions
       @drawn_cards.each { |card| card.pos = card.calc_pos }
       @animations.clear
+    end
+
+    def check_positions
+      @game_state.parts.each &.compact_indices
+      @drawn_cards.sort_by! { |dcard| dcard.my_state.index }
+      @drawn_cards.select do |card|
+        card.open = card.should_open
+        card.pos != card.calc_pos &&
+          !@animations.find { |x| x.card == card }
+      end.each { |card| animate card }
     end
 
     def draw(target, states)
