@@ -61,16 +61,25 @@ module Spellstorm
   class Table
     getter animations
     property game_state : GameState
+    property selected_card : DrawnCard?
+    @check_image : SF::Image
+    @checkbox : RectType
 
     def initialize(decks)
       @game_state = GameState.new(decks)
       @animations = Array(CardAnimation).new
       @drawn_cards = Array(DrawnCard).new(DECK_SIZE*2)
+      @checkbox = new_rect(0, 0, CARD_WIDTH, CARD_HEIGHT, thickness: 2)
+      @check_texture = SF::RenderTexture.new(Engine::SCREENX, Engine::SCREENY)
+      @check_texture.smooth = false
+      @check_image = SF::Image.new(Engine::SCREENX, Engine::SCREENY)
+
       Player.values.each do |pl|
         DECK_SIZE.times do |i|
           @drawn_cards << DrawnCard.new(i, @game_state, decks[pl.to_i], pl)
         end
       end
+      @check_image
     end
 
     def update_positions
@@ -90,25 +99,33 @@ module Spellstorm
 
     def draw(target, states)
       @drawn_cards.each &.draw(target, states)
-    end
-
-    def find_card(x, y, **args)
-      @drawn_cards.each { |card|
-        if SF.float_rect(card.pos.pos.x, card.pos.pos.y, CARD_WIDTH, CARD_HEIGHT).contains?(x, y)
-          return card
-        end
-      }
-      nil
-    end
-
-    # will contain additional constraints
-    def find_card(x, y, **args)
-      @sides.values.each do |v|
-        if c = v.find_card(x, y, **args)
-          return c
-        end
+      if sel = @selected_card
+        sel.draw(target, states)
       end
-      nil
+    end
+
+    def update_checkbox
+      @check_texture.clear
+      states = SF::RenderStates.new
+      @drawn_cards.each_with_index do |card, index|
+        # TODO - more then 254 cards
+        card_color = SF::Color.new(index + 1, 0, 0)
+        @checkbox.outline_color = card_color
+        @checkbox.fill_color = card_color
+        card.draw_checkbox(@check_texture, states, @checkbox)
+      end
+      if sel = @selected_card
+        sel.draw_checkbox(@check_texture, states, @checkbox)
+      end
+      @check_texture.display
+      @check_image = @check_texture.texture.copy_to_image
+    end
+
+    def find_card(x, y)
+      color = @check_image.get_pixel(x, y)
+      index = color.r
+      return nil if index == 0 || index > @drawn_cards.size
+      @drawn_cards[index - 1]
     end
 
     def animate(card)

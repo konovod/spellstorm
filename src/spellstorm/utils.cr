@@ -1,3 +1,7 @@
+require "crsfml/*"
+
+alias RectType = SF::RectangleShape
+
 module Spellstorm
   MAX_HP    =  5
   DECK_SIZE = 40
@@ -39,7 +43,9 @@ module Spellstorm
   end
 end
 
-def new_text(x, y, str, *, size = 12, color = SF::Color::Black, centered = false, style = SF::Text::Regular) : SF::Text
+def new_text(x, y, str, *,
+             size = 12, color = SF::Color::Black,
+             centered = false, style = SF::Text::Regular) : SF::Text
   atext = SF::Text.new
   atext.font = Engine::Font["small.ttf"]
   atext.string = str
@@ -53,8 +59,10 @@ def new_text(x, y, str, *, size = 12, color = SF::Color::Black, centered = false
   return atext
 end
 
-def new_rect(x0, y0, width, height, *, thickness = 1, outline = SF::Color::Transparent, fill = SF::Color::Transparent, texture : (SF::Texture | Nil) = nil) : SF::RectangleShape
-  result = SF::RectangleShape.new(vec(width, height))
+def new_rect(x0, y0, width, height, *,
+             thickness = 1, outline = SF::Color::Transparent,
+             fill = SF::Color::Transparent, texture : (SF::Texture | Nil) = nil) : RectType
+  result = RectType.new(vec(width, height))
   result.position = vec(x0, y0)
   result.texture = texture if texture
   result.outline_color = outline unless outline == SF::Color::Transparent

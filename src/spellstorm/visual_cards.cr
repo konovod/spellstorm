@@ -138,5 +138,10 @@ module Spellstorm
         @back.draw(target, sf_states)
       end
     end
+
+    def draw_checkbox(target : SF::RenderTarget, sf_states : SF::RenderStates, checkbox)
+      sf_states = @pos.apply(sf_states)
+      checkbox.draw(target, sf_states)
+    end
   end
 end

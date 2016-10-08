@@ -13,6 +13,8 @@ module Spellstorm
     def on_mouse(event, x, y)
       return unless event.is_a? SF::Event::MouseButtonReleased
       @table.check_positions
+
+      @table.selected_card = @table.find_card(x, y)
       # side = @table.sides[Player::First]
       # card = side.find_card(x,y)
       # if card
@@ -35,6 +37,7 @@ module Spellstorm
     def draw
       # @window.draw(@back)
       @table.draw(@window, SF::RenderStates.new)
+      @table.update_checkbox
       @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
       @window.draw(@fps_label)
     end
