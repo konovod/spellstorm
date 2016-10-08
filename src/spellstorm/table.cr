@@ -112,9 +112,6 @@ module Spellstorm
       states = SF::RenderStates.new
       @drawn_cards.each_with_index do |card, index|
         # TODO - more then 254 cards
-        card_color = SF::Color.new(card.player.to_i + 1, card.card_index, 0, 255)
-        @checkbox.outline_color = card_color
-        @checkbox.fill_color = card_color
         card.draw_checkbox(@check_texture, states, @checkbox)
       end
       if sel = @selected_card

@@ -146,6 +146,9 @@ module Spellstorm
 
     def draw_checkbox(target : SF::RenderTarget, sf_states : SF::RenderStates, checkbox)
       sf_states = @pos.apply(sf_states)
+      card_color = SF::Color.new(player.to_i + 1, card_index, 0, 255)
+      checkbox.outline_color = card_color
+      checkbox.fill_color = card_color
       checkbox.draw(target, sf_states)
     end
   end
