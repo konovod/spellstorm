@@ -40,9 +40,12 @@ module Spellstorm
 
     def draw
       # @window.draw(@back)
-      @table.check_positions
+      if !@table.animations.empty? || @some_action
+        @table.check_positions
+        @table.update_checkbox
+        @some_action = false
+      end
       @table.draw(@window, SF::RenderStates.new)
-      @table.update_checkbox
       @fps_label.string = "FPS=#{@fps}, UPS=#{@ups}"
       @window.draw(@fps_label)
     end
@@ -68,6 +71,7 @@ module Spellstorm
 
       @back = Engine::Background.new(self, Engine::Tex["water.jpg"])
       @cur_player = Player::First
+      @some_action = true
     end
 
     def run

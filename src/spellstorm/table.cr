@@ -82,7 +82,7 @@ module Spellstorm
       @check_image
     end
 
-    def update_positions
+    def reset_positions
       @drawn_cards.each { |card| card.pos = card.calc_pos }
       @animations.clear
     end
@@ -143,7 +143,7 @@ module Spellstorm
       was = !@animations.empty?
       @animations.reject! &.process
       if @animations.empty? && was
-        update_positions
+        reset_positions
       end
     end
   end
