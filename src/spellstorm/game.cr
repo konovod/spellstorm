@@ -14,7 +14,12 @@ module Spellstorm
       return unless event.is_a? SF::Event::MouseButtonReleased
       @table.check_positions
 
-      @table.selected_card = @table.find_card(x, y)
+      card = @table.find_card(x, y)
+      if card && card.open
+        @table.selected_card = card
+      else
+        @table.selected_card = nil
+      end
       # side = @table.sides[Player::First]
       # card = side.find_card(x,y)
       # if card

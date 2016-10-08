@@ -14,7 +14,7 @@ module Spellstorm
 
   Y0 = Engine::SCREENY - CARD_HEIGHT
 
-  INFO_SCALE = 2.0
+  INFO_SCALE = 1.6
   INFO_X     = Engine::SCREENX - CARD_WIDTH*INFO_SCALE
   INFO_Y     = Engine::SCREENY / 2 - CARD_HEIGHT*INFO_SCALE / 2
 
