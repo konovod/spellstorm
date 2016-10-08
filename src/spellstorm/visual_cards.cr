@@ -75,9 +75,10 @@ module Spellstorm
 
     def initialize(@card_index, @states : GameState, @deck : Deck, @player : Player)
       @open = false
-      @pos = CardPos.new(vec(Engine::SCREENX / 2, Engine::SCREENY / 2), 0.0)
+      starty = @player == Player::First ? Y0 - 100 : 100
+      @pos = CardPos.new(vec(Engine::SCREENX / 2, starty), 0.0)
       acard = @deck.data[@card_index]
-      label_name = new_text(CARD_WIDTH / 2, CARD_HEIGHT / 2, acard.name,
+      label_name = new_text(CARD_WIDTH / 2, 30, acard.name,
         size: 16, color: SF::Color::Black, centered: true)
       label_cost = new_text(10, 10, acard.cost.to_s,
         size: 16, color: SF::Color::Black, style: SF::Text::Bold, centered: true)

@@ -3,7 +3,7 @@ module Spellstorm
   DECK_SIZE = 40
   GAME_SIZE = DECK_SIZE * 2
 
-  CARD_WIDTH  = 120
+  CARD_WIDTH  = 140
   CARD_HEIGHT = 160
 
   ANIM_SPEED = 20
