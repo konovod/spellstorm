@@ -5,59 +5,6 @@ require "./cards.cr"
 require "./visual_cards.cr"
 
 module Spellstorm
-  abstract class Action
-    abstract def perform(state : GameState)
-    abstract def visualize(table : Table)
-
-    def initialize(@player : Player)
-    end
-
-    def set_card_state(table, card_index, state, open)
-      @data[card.state].delete(card)
-      card.state = state
-      card.open = true if open
-      @data[state] << card
-      card.index = @data[state].size - 1
-      @table.animate card
-    end
-  end
-
-  class ActionDraw < Action
-    def perform(state : GameState)
-    end
-
-    def visualize(table : Table)
-    end
-  end
-
-  # def new_game(adeck)
-  #   drop.clear
-  #   field.clear
-  #   hand.clear
-  #   deck.clear
-  #   deck.concat(adeck.data.map { |c| DrawnCard.new(c, @reverted) })
-  #   deck.shuffle!
-  #   deck.each &.reset
-  #   10.times { draw_card }
-  #   hand.sample(6).each { |c| play_card(c) }
-  #   field.sample(2).each { |c| drop_card(c) }
-  #   update_positions
-  # end
-
-  # def draw_card
-  #   return if deck.empty?
-  #   card = deck.pop
-  #   set_card_state(card, CardState::Hand, !@reverted)
-  # end
-  #
-  # def play_card(card)
-  #   set_card_state(card, CardState::Field, @reverted)
-  # end
-  #
-  # def drop_card(card)
-  #   set_card_state(card, CardState::Drop, true)
-  # end
-
   class Table
     getter animations
     property game_state : GameState

@@ -33,5 +33,9 @@ describe Spellstorm do
     enemy.count_cards(CardLocation::Deck).should eq(DECK_SIZE-MAX_HP-1)
     enemy.count_cards(CardLocation::Drop).should eq(1)
   end
+  it "possible_actions : play" do
+    we.possible_actions.size.should eq MAX_HP
+    we.possible_actions.each &.should be_a ActionPlay
+  end
 
 end

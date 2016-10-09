@@ -5,9 +5,13 @@ module Spellstorm
   enum CardLocation
     Deck
     Hand
-    Field
+    FieldShield
+    FieldDanger
+    FieldSource
+    FieldOther
     Drop
   end
+  N_CARD_LOCATIONS = 7
 
   enum Element
     Neutral
@@ -18,6 +22,7 @@ module Spellstorm
   end
 
   alias CardIndex = Int32
+  alias ActionArray = Array(Action)
 
   struct CardState
     property location : CardLocation
@@ -78,9 +83,6 @@ module Spellstorm
         who.refill_hand
       end
     end
-
-    def possible_actions(player)
-    end
   end
 
   class PlayerState
@@ -92,7 +94,7 @@ module Spellstorm
       @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(@player, i) }
       @hp = MAX_HP
       @damage = 0
-      @counts = StaticArray(Int32, 4).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
+      @counts = StaticArray(Int32, N_CARD_LOCATIONS).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
     end
 
     def count_cards(location : CardLocation)
@@ -110,14 +112,14 @@ module Spellstorm
     def refill_hand
       needed = @hp - count_cards(CardLocation::Hand)
       if needed < 0
-        in_hand = (0...@data.size).select { |i| @data[i].location == CardLocation::Hand }.shuffle!
+        in_hand = at_location(CardLocation::Hand).shuffle!
         # drop excess cards
         (-needed).times do
           move_card(in_hand.pop, CardLocation::Drop)
         end
       else
         # get more cards
-        in_deck = (0...@data.size).select { |i| @data[i].location == CardLocation::Deck }.shuffle!
+        in_deck = at_location(CardLocation::Deck).shuffle!
         if in_deck.size < needed
           # TODO
           raise "Out of cards."
@@ -128,12 +130,22 @@ module Spellstorm
       end
     end
 
+    def at_location(loc) : Array(CardIndex)
+      (0...@data.size).select { |i| @data[i].location == loc }
+    end
+
     def compact_indices
       CardLocation.values.each do |loc|
-        numbers = (0...@data.size).select { |i| @data[i].location == loc }
+        numbers = at_location loc
         numbers.sort_by! { |i| @data[i].index } unless loc == CardLocation::Deck
         numbers.each_with_index { |i, index| @data[i] = @data[i].set_index index }
       end
+    end
+
+    def possible_actions
+      result = [] of Action
+      at_location(CardLocation::Hand).each { |index| result << ActionPlay.new(@player, index) }
+      result
     end
   end
 
@@ -146,6 +158,26 @@ module Spellstorm
     abstract def typ_name : String
 
     def initialize(@name, @cost, @element, @power)
+    end
+
+    def field_location(state : CardState) : CardLocation
+      CardLocation::FieldOther
+    end
+  end
+
+  abstract class Action
+    abstract def perform(state : GameState)
+
+    def initialize(@player : Player)
+    end
+  end
+
+  class ActionPlay < Action
+    def initialize(@player, @card_index : CardIndex)
+    end
+
+    def perform(state : GameState)
+      # TODO - pay mana
     end
   end
 end

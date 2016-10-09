@@ -29,7 +29,22 @@ module Spellstorm
       delta: vec(CARD_WIDTH + 5, 0),
       angle0: 0.0, dangle: 0.0,
     },
-    CardLocation::Field => {
+    CardLocation::FieldSource => {
+      pos: vec(10, Y0 - CARD_HEIGHT - 10),
+      delta: vec(CARD_WIDTH + 5, 0),
+      angle0: -20.0, dangle: 5.0,
+    },
+    CardLocation::FieldShield => {
+      pos: vec(10, Y0 - CARD_HEIGHT - 100),
+      delta: vec(CARD_WIDTH + 5, 0),
+      angle0: -20.0, dangle: 5.0,
+    },
+    CardLocation::FieldDanger => {
+      pos: vec(10, Y0 - CARD_HEIGHT - 75),
+      delta: vec(CARD_WIDTH + 5, 0),
+      angle0: -20.0, dangle: 5.0,
+    },
+    CardLocation::FieldOther => {
       pos: vec(10, Y0 - CARD_HEIGHT - 50),
       delta: vec(CARD_WIDTH + 5, 0),
       angle0: -20.0, dangle: 5.0,

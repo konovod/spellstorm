@@ -5,11 +5,19 @@ module Spellstorm
     def typ_name : String
       "Щит"
     end
+
+    def field_location(state : CardState) : CardLocation
+      CardLocation::FieldShield
+    end
   end
 
   class DangerCard < Card
     def typ_name : String
       "Угроза"
+    end
+
+    def field_location(state : CardState) : CardLocation
+      CardLocation::FieldDanger
     end
   end
 
@@ -28,6 +36,10 @@ module Spellstorm
   class SourceCard < Card
     def typ_name : String
       "Накопитель"
+    end
+
+    def field_location(state : CardState) : CardLocation
+      CardLocation::FieldSource
     end
   end
 end
