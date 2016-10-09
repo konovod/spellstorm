@@ -112,7 +112,7 @@ module Spellstorm
       if needed < 0
         in_hand = (0...@data.size).select { |i| @data[i].location == CardLocation::Hand }.shuffle!
         # drop excess cards
-        needed.times do
+        (-needed).times do
           move_card(in_hand.pop, CardLocation::Drop)
         end
       else
