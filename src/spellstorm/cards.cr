@@ -91,6 +91,7 @@ module Spellstorm
     property damage : Int32
     property mana
     getter counts
+    getter deck
 
     def initialize(@player : Player, @deck : Deck)
       @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(@player, i) }
@@ -110,6 +111,24 @@ module Spellstorm
 
     def move_card(card_index, location : CardLocation)
       @data[card_index] = @data[card_index].move self, location
+    end
+
+    def max_mana(element)
+      allowed = @mana[Element::Neutral.to_i]
+      allowed += @mana[element.to_i] unless element == Element::Neutral
+      allowed
+    end
+
+    def pay_mana(element, value)
+      return false if value > max_mana(element)
+      if value >= @mana[element.to_i]
+        value -= @mana[element.to_i]
+        @mana[element.to_i] = 0
+        @mana[Element::Neutral.to_i] -= value
+      else
+        @mana[element.to_i] -= value
+      end
+      true
     end
 
     def refill_hand
@@ -186,11 +205,17 @@ module Spellstorm
   end
 
   class ActionPlay < Action
+    getter card_index
+
     def initialize(@player, @card_index : CardIndex)
     end
 
     def perform(state : GameState)
-      # TODO - pay mana
+      st = state.parts[@player.to_i]
+      card = st.deck.cards[card_index]
+      raise "IMPOSSIBLE" unless st.pay_mana(card.element, card.cost)
+      loc = st.deck.cards[card_index].field_location(st.card_state(@card_index))
+      st.move_card(card_index, loc)
     end
   end
 end
