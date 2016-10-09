@@ -12,11 +12,12 @@ describe Spellstorm do
   game_state = GameState.new(decks)
   it "new game" do
     game_state.parts.each do |part|
-      p part.counts
       part.hp.should eq(MAX_HP)
       part.count_cards(CardLocation::Deck).should eq(DECK_SIZE-MAX_HP)
       part.count_cards(CardLocation::Hand).should eq(MAX_HP)
     end
   end
+
+  
 
 end

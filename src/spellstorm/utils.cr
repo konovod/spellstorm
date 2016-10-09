@@ -44,6 +44,10 @@ module Spellstorm
   enum Player
     First
     Second
+
+    def opponent
+      self == First ? Second : First
+    end
   end
 end
 
