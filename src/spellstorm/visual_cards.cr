@@ -67,7 +67,7 @@ module Spellstorm
     end
 
     def card
-      @deck.data[@card_index]
+      @deck.cards[@card_index]
     end
 
     def visual_index
@@ -78,7 +78,7 @@ module Spellstorm
       @open = false
       starty = @player == Player::First ? Y0 - 100 : 100
       @pos = CardPos.new(vec(Engine::SCREENX / 2, starty), 0.0)
-      acard = @deck.data[@card_index]
+      acard = @deck.cards[@card_index]
       label_name = new_text(CARD_WIDTH / 2, 30, acard.name,
         size: 16, color: SF::Color::Black, centered: true)
       label_cost = new_text(10, 10, acard.cost.to_s,

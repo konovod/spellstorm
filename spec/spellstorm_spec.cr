@@ -7,7 +7,7 @@ describe Spellstorm do
   decks = {Deck.new, Deck.new}
   it "decks generation" do
     decks.each &.generate
-    decks.each {|deck| deck.data.size.should eq(DECK_SIZE)}
+    decks.each {|deck| deck.cards.size.should eq(DECK_SIZE)}
   end
   game_state = GameState.new(decks)
   it "new game" do
@@ -34,6 +34,8 @@ describe Spellstorm do
     enemy.count_cards(CardLocation::Drop).should eq(1)
   end
   it "possible_actions : play" do
+    we.possible_actions.size.should eq 0
+    we.mana[0] = 100
     we.possible_actions.size.should eq MAX_HP
     we.possible_actions.each &.should be_a ActionPlay
   end

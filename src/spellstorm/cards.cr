@@ -20,6 +20,7 @@ module Spellstorm
     Earth
     Air
   end
+  N_ELEMENTS = 5
 
   alias CardIndex = Int32
   alias ActionArray = Array(Action)
@@ -88,6 +89,7 @@ module Spellstorm
   class PlayerState
     property hp : Int32
     property damage : Int32
+    property mana
     getter counts
 
     def initialize(@player : Player, @deck : Deck)
@@ -95,6 +97,7 @@ module Spellstorm
       @hp = MAX_HP
       @damage = 0
       @counts = StaticArray(Int32, N_CARD_LOCATIONS).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
+      @mana = StaticArray(Int32, N_ELEMENTS).new(0)
     end
 
     def count_cards(location : CardLocation)
@@ -144,7 +147,11 @@ module Spellstorm
 
     def possible_actions
       result = [] of Action
-      at_location(CardLocation::Hand).each { |index| result << ActionPlay.new(@player, index) }
+      at_location(CardLocation::Hand).each do |index|
+        if @deck.cards[index].playable(self)
+          result << ActionPlay.new(@player, index)
+        end
+      end
       result
     end
   end
@@ -162,6 +169,12 @@ module Spellstorm
 
     def field_location(state : CardState) : CardLocation
       CardLocation::FieldOther
+    end
+
+    def playable(player_state : PlayerState) : Bool
+      allowed = player_state.mana[Element::Neutral.to_i]
+      allowed += player_state.mana[@element.to_i] unless @element == Element::Neutral
+      allowed >= @cost
     end
   end
 
