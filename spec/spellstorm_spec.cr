@@ -33,6 +33,10 @@ describe Spellstorm do
     enemy.count_cards(CardLocation::Deck).should eq(DECK_SIZE-MAX_HP-1)
     enemy.count_cards(CardLocation::Drop).should eq(1)
   end
+  it "sum of counts ok" do
+    CardLocation.values.sum{ |loc| we.count_cards(loc)}.should eq DECK_SIZE
+    CardLocation.values.sum{ |loc| enemy.count_cards(loc)}.should eq DECK_SIZE
+  end
   it "possible_actions : play" do
     we.mana[0] = 0
     we.possible_actions.size.should eq 0
@@ -55,7 +59,6 @@ describe Spellstorm do
   end
   #tests of damage system
   #first, preparation
-
   attacks = CardsDB.instance.data.select(&.is_a? DangerCard).sort_by(&.power)
   shields = CardsDB.instance.data.select(&.is_a? ShieldCard).sort_by(&.power)
   big_attack = attacks.last
@@ -68,6 +71,32 @@ describe Spellstorm do
     small_attack.power.should be < big_shield.power
     big_attack.power.should be > small_shield.power
   end
+  #patch decks
+  decks[0].cards[0] = big_attack
+  decks[0].cards[1] = big_shield
+  decks[1].cards[0] = small_shield
+  decks[1].cards[1] = small_attack
+  #new game
+  game_state = GameState.new(decks)
+  we = game_state.parts[Player::First.to_i]
+  enemy = game_state.parts[Player::Second.to_i]
+  #get cards to hand
+  {we, enemy}.each do |x|
+    loop do
+      x.move_card 0, CardLocation::Hand
+      x.move_card 1, CardLocation::Hand
+      x.refill_hand
+      break if x.card_state(0).location == CardLocation::Hand && x.card_state(1).location == CardLocation::Hand
+    end
+  end
+  #sanity check
+  it "prepare for damage" do
+    we.card_state(1).location.should eq CardLocation::Hand
+    enemy.count_cards(CardLocation::Hand).should eq MAX_HP
+  end
+
+
+
 
 
 
