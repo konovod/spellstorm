@@ -186,14 +186,35 @@ module Spellstorm
     def initialize(@name, @cost, @element, @power)
     end
 
-    def field_location(state : CardState) : CardLocation
-      CardLocation::FieldOther
-    end
-
     def playable(player_state : PlayerState) : Bool
       allowed = player_state.mana[Element::Neutral.to_i]
       allowed += player_state.mana[@element.to_i] unless @element == Element::Neutral
       allowed >= @cost
+    end
+
+    # redefinable methods
+    def field_location(state : CardState) : CardLocation
+      CardLocation::FieldOther
+    end
+
+    def get_damage(state : CardState) : Int32
+      0
+    end
+
+    def estimate_shield(state : CardState) : Int32
+      0
+    end
+
+    def damage_hook(state : CardState, other : Card, other_state : CardState, value : Int32) : Int32
+      value
+    end
+
+    def damage_player(state : CardState, game : GameState, value : Int32)
+      game.parts[state.side.opponent].hp -= value
+    end
+
+    def shield_card(state : CardState, other : Card, other_state : CardState, value : Int32) : Int32
+      value
     end
   end
 
