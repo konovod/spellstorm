@@ -17,7 +17,7 @@ module Spellstorm
     end
 
     def invert
-      @pos.y = Y0 - @pos.y - 100
+      @pos.y = Y0 - @pos.y - TOP_HIDING
     end
   end
 

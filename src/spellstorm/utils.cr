@@ -11,6 +11,7 @@ module Spellstorm
   CARD_HEIGHT = 160
 
   ANIM_SPEED = 20
+  TOP_HIDING = 100
 
   Y0 = Engine::SCREENY - CARD_HEIGHT
 
