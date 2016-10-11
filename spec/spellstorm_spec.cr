@@ -94,6 +94,20 @@ describe Spellstorm do
     we.card_state(1).location.should eq CardLocation::Hand
     enemy.count_cards(CardLocation::Hand).should eq MAX_HP
   end
+  it "small atack don't penetrate big shield" do
+    we.mana[0] = 100
+    enemy.mana[0] = 100
+    we.possible_actions[1].perform(game_state)
+    enemy.possible_actions[1].perform(game_state)
+    game_state.next_turn
+    we.hp.should eq MAX_HP
+    we.card_state(1).hp.should eq big_shield.power - small_attack.power
+  end
+  it "but shield fails over time" do
+    5.times {game_state.next_turn}
+    we.hp.should eq MAX_HP - small_attack.power
+    we.card_state(1).location.should eq CardLocation::Drop
+  end
 
 
 
