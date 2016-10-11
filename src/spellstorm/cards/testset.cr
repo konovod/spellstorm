@@ -23,7 +23,7 @@ module Spellstorm
       @data << ShieldCard.new("Большой щит", 6, Element::Neutral, 5)
       @data << DangerCard.new("Малая угроза", 1, Element::Neutral, 1)
       @data << DangerCard.new("Средняя угроза", 3, Element::Neutral, 2)
-      @data << DangerCard.new("Большая угроза", 7, Element::Neutral, 2)
+      @data << DangerCard.new("Большая угроза", 7, Element::Neutral, 3)
       @data << ActionCard.new("Молния", 2, Element::Neutral, 2)
       @data << ActionCard.new("Большая Молния", 5, Element::Neutral, 5)
       @data << EnchantCard.new("Тишина", 3, Element::Neutral, 2)

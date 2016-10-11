@@ -53,6 +53,21 @@ describe Spellstorm do
     we.count_cards(loc).should eq(1)
     (we.mana.sum).should eq old - card.cost
   end
+  #tests of damage system
+  #first, preparation
+
+  attacks = CardsDB.instance.data.select(&.is_a? DangerCard).sort_by(&.power)
+  shields = CardsDB.instance.data.select(&.is_a? ShieldCard).sort_by(&.power)
+  big_attack = attacks.last
+  small_attack = attacks.first
+  big_shield = shields.last
+  small_shield = shields.first
+  it "cards set not broken" do
+    attacks.size.should be > 1
+    shields.size.should be > 1
+    small_attack.power.should be < big_shield.power
+    big_attack.power.should be > small_shield.power
+  end
 
 
 

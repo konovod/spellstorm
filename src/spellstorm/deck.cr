@@ -16,7 +16,7 @@ module Spellstorm
       end
     end
 
-    def find(card)
+    def find(card) : CardIndex
       @cards.index(card).not_nil!
     end
   end
