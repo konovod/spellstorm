@@ -28,7 +28,11 @@ module Spellstorm
         owner.data[index].{{x}}
       end
       def {{x}}=(value)
-        owner.data[index].{{x}}=value
+        #lol, no easy structs mutation
+        #owner.data[index].{{x}}=value
+        t = owner.data[index]
+        t.{{x}}=value
+        owner.data[index] = t
       end
     end
 
@@ -37,15 +41,15 @@ module Spellstorm
     access_property loc_index
 
     def reset
-      hp = 0
-      loc_index = 0
-      location = CardLocation::Deck
+      self.hp = 0
+      self.loc_index = 0
+      self.location = CardLocation::Deck
     end
 
     def move(newlocation)
       owner.counts[location.to_i] -= 1
-      location = newlocation
-      loc_index = owner.count_cards(newlocation)
+      self.location = newlocation
+      self.loc_index = owner.count_cards(newlocation)
       owner.counts[newlocation.to_i] += 1
     end
 
