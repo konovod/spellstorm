@@ -38,45 +38,34 @@ module Spellstorm
     end
   end
 
-  class GameState
-    property parts
-
-    def initialize(decks)
-      @parts = {
-        PlayerState.new(Player::First, decks[0]),
-        PlayerState.new(Player::Second, decks[1]),
-      }
-      next_turn
-    end
-
-    def card_state(player, card_index)
-      @parts[player.to_i].card_state(card_index)
-    end
-
-    def next_turn
-      Player.values.each do |player|
-        who = @parts[player.to_i]
-        enemy = @parts[player.opponent.to_i]
-        # TODO - all mechanics
-        who.hp = MAX_HP - enemy.damage
-        who.refill_hand
-      end
-    end
-  end
-
   class PlayerState
     property hp : Int32
-    property damage : Int32
-    property mana
+    property test_damage : Int32
+    property test_mana
     getter counts
     getter deck
+    property own_mana
 
     def initialize(@player : Player, @deck : Deck)
       @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(@player, i) }
       @hp = MAX_HP
-      @damage = 0
+      @test_damage = 0
       @counts = StaticArray(Int32, N_CARD_LOCATIONS).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
-      @mana = StaticArray(Int32, N_ELEMENTS).new(0)
+      @test_mana = StaticArray(Int32, N_ELEMENTS).new(0)
+      @own_mana = 0
+    end
+
+    def estim_damage
+      0
+    end
+
+    def estim_shield
+      0
+    end
+
+    def mana(element)
+      @test_mana[element.to_i]
+      # TODO - source mechanics
     end
 
     def count_cards(location : CardLocation)
@@ -92,19 +81,19 @@ module Spellstorm
     end
 
     def max_mana(element)
-      allowed = @mana[Element::Neutral.to_i]
-      allowed += @mana[element.to_i] unless element == Element::Neutral
+      allowed = mana(Element::Neutral)
+      allowed += mana(element) unless element == Element::Neutral
       allowed
     end
 
     def pay_mana(element, value)
       return false if value > max_mana(element)
-      if value >= @mana[element.to_i]
-        value -= @mana[element.to_i]
-        @mana[element.to_i] = 0
-        @mana[Element::Neutral.to_i] -= value
+      if value >= @test_mana[element.to_i]
+        value -= @test_mana[element.to_i]
+        @test_mana[element.to_i] = 0
+        @test_mana[Element::Neutral.to_i] -= value
       else
-        @mana[element.to_i] -= value
+        @test_mana[element.to_i] -= value
       end
       true
     end
@@ -130,8 +119,12 @@ module Spellstorm
       end
     end
 
-    def at_location(loc) : Array(CardIndex)
+    def at_location(loc : CardLocation) : Array(CardIndex)
       (0...@data.size).select { |i| @data[i].location == loc }
+    end
+
+    def at_location(locs) : Array(CardIndex)
+      (0...@data.size).select { |i| locs.includes? @data[i].location }
     end
 
     def compact_indices
@@ -150,6 +143,35 @@ module Spellstorm
         end
       end
       result
+    end
+  end
+end
+
+class GameState
+  property parts
+
+  def initialize(decks)
+    @parts = {
+      PlayerState.new(Player::First, decks[0]),
+      PlayerState.new(Player::Second, decks[1]),
+    }
+    next_turn
+  end
+
+  def card_state(player, card_index)
+    @parts[player.to_i].card_state(card_index)
+  end
+
+  def next_turn
+    Player.values.each do |player|
+      who = @parts[player.to_i]
+      enemy = @parts[player.opponent.to_i]
+      # damage and shields mechanics
+      who_cards = who.at_location(CardLocation.field)
+      enemy_cards = enemy.at_location(CardLocation.field)
+      total_damage = who_cards.sum { |index| who.deck.cards[index].get_damage(who.card_state(index)) }
+      # who.hp = MAX_HP - enemy.damage
+      who.refill_hand
     end
   end
 end

@@ -10,6 +10,10 @@ module Spellstorm
     FieldSource
     FieldOther
     Drop
+
+    def self.field
+      {FieldShield, FieldDanger, FieldSource, FieldOther}
+    end
   end
   N_CARD_LOCATIONS = 7
 
@@ -37,9 +41,7 @@ module Spellstorm
     end
 
     def playable(player_state : PlayerState) : Bool
-      allowed = player_state.mana[Element::Neutral.to_i]
-      allowed += player_state.mana[@element.to_i] unless @element == Element::Neutral
-      allowed >= @cost
+      player_state.max_mana(@element) >= @cost
     end
 
     # redefinable methods
