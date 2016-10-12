@@ -53,7 +53,7 @@ module Spellstorm
       0
     end
 
-    def estimate_shield(state : CardState) : Int32
+    def estim_shield(state : CardState) : Int32
       0
     end
 
@@ -62,7 +62,7 @@ module Spellstorm
     end
 
     def damage_player(state : CardState, game : GameState, value : Int32)
-      game.parts[state.side.opponent].hp -= value
+      game.parts[state.side.opponent.to_i].hp -= value
     end
 
     def shield_card(state : CardState, other : Card, other_state : CardState, value : Int32) : Int32

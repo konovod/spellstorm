@@ -55,12 +55,13 @@ module Spellstorm
       @own_mana = 0
     end
 
+    # TODO - optimization?
     def estim_damage
-      0
+      at_location(CardLocation.field).sum { |index| @deck.cards[index].get_damage(card_state(index)) }
     end
 
     def estim_shield
-      0
+      at_location(CardLocation.field).sum { |index| @deck.cards[index].estim_shield(card_state(index)) }
     end
 
     def mana(element)
@@ -88,6 +89,7 @@ module Spellstorm
 
     def pay_mana(element, value)
       return false if value > max_mana(element)
+      # TODO - source mechanics
       if value >= @test_mana[element.to_i]
         value -= @test_mana[element.to_i]
         @test_mana[element.to_i] = 0
@@ -169,8 +171,30 @@ class GameState
       # damage and shields mechanics
       who_cards = who.at_location(CardLocation.field)
       enemy_cards = enemy.at_location(CardLocation.field)
-      total_damage = who_cards.sum { |index| who.deck.cards[index].get_damage(who.card_state(index)) }
-      # who.hp = MAX_HP - enemy.damage
+      if who.estim_damage > 0
+        # TODO - remove dynamic allocations here?
+        attackers = Hash(CardIndex, Int32).new
+        who_cards.each do |index|
+          v = who.deck.cards[index].get_damage(who.card_state(index))
+          attackers[index] = v if v > 0
+        end
+        defenders = enemy_cards.select do |index|
+          enemy.deck.cards[index].estim_shield(enemy.card_state(index)) > 0
+        end
+        attackers.each do |index, dam|
+          attacker = who.deck.cards[index]
+          defenders.each do |def_index|
+            defender = enemy.deck.cards[def_index]
+            dam = attacker.damage_hook(who.card_state(index), defender, enemy.card_state(def_index), dam)
+            break if dam <= 0
+            dam = defender.shield_card(enemy.card_state(def_index), attacker, who.card_state(index), dam)
+            break if dam <= 0
+          end
+          attacker.damage_player(who.card_state(index), self, dam) if dam > 0
+        end
+      end
+
+      who.hp = MAX_HP - enemy.test_damage
       who.refill_hand
     end
   end
