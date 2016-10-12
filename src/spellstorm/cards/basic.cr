@@ -14,7 +14,7 @@ module Spellstorm
       @power
     end
 
-    def shield_card(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
+    def hook_shield(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
       if value > state.hp
         value -= state.hp
         state.hp = 0

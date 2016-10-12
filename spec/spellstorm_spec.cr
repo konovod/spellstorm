@@ -104,7 +104,7 @@ describe Spellstorm do
     we.card_state(1).hp.should eq big_shield.power - small_attack.power
   end
   it "but shield fails over time" do
-    5.times {game_state.next_turn}
+    10.times {game_state.next_turn}
     we.hp.should eq MAX_HP - small_attack.power
     we.card_state(1).location.should eq CardLocation::Drop
   end
