@@ -30,9 +30,10 @@ module Spellstorm
       def {{x}}=(value)
         #lol, no easy structs mutation
         #owner.data[index].{{x}}=value
-        t = owner.data[index]
-        t.{{x}}=value
-        owner.data[index] = t
+        ((owner.data.to_unsafe.as(CardState*) + index)).value.{{x}}=value
+        # t = owner.data[index]
+        # t.{{x}}=value
+        # owner.data[index] = t
       end
     end
 
