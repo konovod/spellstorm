@@ -5,49 +5,71 @@ require "./cards.cr"
 module Spellstorm
   struct CardState
     property location : CardLocation
-    property index : Int32
+    property loc_index : Int32
     property hp : Int32
-    property side : Player
 
-    def initialize(@side, @index)
+    def initialize(@loc_index)
       @hp = 0
       @location = CardLocation::Deck
     end
+  end
+
+  alias CardIndex = Int32
+
+  struct CardStateMutable
+    property owner : PlayerState
+    property index : CardIndex
+
+    def initialize(@owner, @index)
+    end
+
+    macro access_property(x)
+      def {{x}}
+        owner.data[index].{{x}}
+      end
+      def {{x}}=(value)
+        owner.data[index].{{x}}=value
+      end
+    end
+
+    access_property location
+    access_property hp
+    access_property loc_index
 
     def reset
-      result = self
-      result.hp = 0
-      result.index = 0
-      result.location = CardLocation::Deck
-      result
+      hp = 0
+      loc_index = 0
+      location = CardLocation::Deck
     end
 
-    def move(states, newlocation)
-      result = self
-      states.counts[location.to_i] -= 1
-      result.location = newlocation
-      result.index = states.count_cards(newlocation)
-      states.counts[newlocation.to_i] += 1
-      result
+    def move(newlocation)
+      owner.counts[location.to_i] -= 1
+      location = newlocation
+      loc_index = owner.count_cards(newlocation)
+      owner.counts[newlocation.to_i] += 1
     end
 
-    def set_index(aindex)
-      result = self
-      result.index = aindex
-      result
+    def card
+      owner.deck.cards[index]
+    end
+
+    def raw
+      owner.data[index]
     end
   end
 
   class PlayerState
+    getter game : GameState
     property hp : Int32
     property test_damage : Int32
     property test_mana
     getter counts
     getter deck
     property own_mana
+    property data
 
-    def initialize(@player : Player, @deck : Deck)
-      @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(@player, i) }
+    def initialize(@game, @player : Player, @deck : Deck)
+      @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(i) }
       @hp = MAX_HP
       @test_damage = 0
       @counts = StaticArray(Int32, N_CARD_LOCATIONS).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
@@ -55,13 +77,17 @@ module Spellstorm
       @own_mana = 0
     end
 
+    def opponent
+      @game.parts[@player.opponent.to_i]
+    end
+
     # TODO - optimization?
     def estim_damage
-      at_location(CardLocation.field).sum { |index| @deck.cards[index].get_damage(card_state(index)) }
+      at_location(CardLocation.field).sum { |mut| mut.card.get_damage(mut) }
     end
 
     def estim_shield
-      at_location(CardLocation.field).sum { |index| @deck.cards[index].estim_shield(card_state(index)) }
+      at_location(CardLocation.field).sum { |mut| mut.card.estim_shield(mut) }
     end
 
     def mana(element)
@@ -74,11 +100,7 @@ module Spellstorm
     end
 
     def card_state(card_index)
-      @data[card_index]
-    end
-
-    def move_card(card_index, location : CardLocation)
-      @data[card_index] = @data[card_index].move self, location
+      CardStateMutable.new(self, card_index)
     end
 
     def max_mana(element)
@@ -106,7 +128,7 @@ module Spellstorm
         in_hand = at_location(CardLocation::Hand).shuffle!
         # drop excess cards
         (-needed).times do
-          move_card(in_hand.pop, CardLocation::Drop)
+          in_hand.pop.move(CardLocation::Drop)
         end
       else
         # get more cards
@@ -116,32 +138,34 @@ module Spellstorm
           raise "Out of cards."
         end
         needed.times do
-          move_card(in_deck.pop, CardLocation::Hand)
+          in_deck.pop.move(CardLocation::Hand)
         end
       end
     end
 
-    def at_location(loc : CardLocation) : Array(CardIndex)
-      (0...@data.size).select { |i| @data[i].location == loc }
+    def at_location(loc : CardLocation) : Array(CardStateMutable)
+      locs = {loc}
+      at_location locs
     end
 
-    def at_location(locs) : Array(CardIndex)
-      (0...@data.size).select { |i| locs.includes? @data[i].location }
+    def at_location(locs) : Array(CardStateMutable)
+      (0...@data.size).select { |i| locs.includes? @data[i].location }.map { |index| CardStateMutable.new(self, index) }
     end
 
     def compact_indices
       CardLocation.values.each do |loc|
         numbers = at_location loc
+        # card_state isn't used here as a (premature?) optimization
         numbers.sort_by! { |i| @data[i].index } unless loc == CardLocation::Deck
-        numbers.each_with_index { |i, index| @data[i] = @data[i].set_index index }
+        numbers.each_with_index { |i, index| @data[i].index = index }
       end
     end
 
     def possible_actions
       result = [] of Action
-      at_location(CardLocation::Hand).each do |index|
-        if @deck.cards[index].playable(self)
-          result << ActionPlay.new(@player, index)
+      at_location(CardLocation::Hand).each do |mut|
+        if mut.card.playable(self)
+          result << ActionPlay.new(mut)
         end
       end
       result
@@ -153,10 +177,10 @@ class GameState
   property parts
 
   def initialize(decks)
-    @parts = {
-      PlayerState.new(Player::First, decks[0]),
-      PlayerState.new(Player::Second, decks[1]),
-    }
+    # TODO - tuple\StaticArray make it nullable
+    @parts = [] of PlayerState
+    @parts << PlayerState.new(self, Player::First, decks[0])
+    @parts << PlayerState.new(self, Player::Second, decks[1])
     next_turn
   end
 
@@ -173,24 +197,22 @@ class GameState
       enemy_cards = enemy.at_location(CardLocation.field)
       if who.estim_damage > 0
         # TODO - remove dynamic allocations here?
-        attackers = Hash(CardIndex, Int32).new
-        who_cards.each do |index|
-          v = who.deck.cards[index].get_damage(who.card_state(index))
-          attackers[index] = v if v > 0
+        attackers = Hash(CardStateMutable, Int32).new
+        who_cards.each do |mut|
+          v = mut.card.get_damage(mut)
+          attackers[mut] = v if v > 0
         end
-        defenders = enemy_cards.select do |index|
-          enemy.deck.cards[index].estim_shield(enemy.card_state(index)) > 0
+        defenders = enemy_cards.select do |def_mut|
+          def_mut.card.estim_shield(def_mut) > 0
         end
-        attackers.each do |index, dam|
-          attacker = who.deck.cards[index]
-          defenders.each do |def_index|
-            defender = enemy.deck.cards[def_index]
-            dam = attacker.damage_hook(who.card_state(index), defender, enemy.card_state(def_index), dam)
+        attackers.each do |attacker, dam|
+          defenders.each do |defender|
+            dam = attacker.card.damage_hook(attacker, defender, dam)
             break if dam <= 0
-            dam = defender.shield_card(enemy.card_state(def_index), attacker, who.card_state(index), dam)
+            dam = defender.card.shield_card(defender, attacker, dam)
             break if dam <= 0
           end
-          attacker.damage_player(who.card_state(index), self, dam) if dam > 0
+          attacker.card.damage_player(attacker, dam) if dam > 0
         end
       end
 

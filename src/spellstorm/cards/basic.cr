@@ -9,6 +9,14 @@ module Spellstorm
     def field_location(state : CardState) : CardLocation
       CardLocation::FieldShield
     end
+
+    def estim_shield(state : CardState) : Int32
+      @power
+    end
+
+    def shield_card(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
+      value - @power
+    end
   end
 
   class DangerCard < Card
@@ -18,6 +26,10 @@ module Spellstorm
 
     def field_location(state : CardState) : CardLocation
       CardLocation::FieldDanger
+    end
+
+    def get_damage(state : CardState) : Int32
+      @power
     end
   end
 

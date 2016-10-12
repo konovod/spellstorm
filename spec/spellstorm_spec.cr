@@ -45,14 +45,14 @@ describe Spellstorm do
     we.possible_actions.each &.should be_a ActionPlay
   end
   it "playing card" do
-    index = we.at_location(CardLocation::Hand).first
-    card = we.deck.cards[index]
+    what = we.at_location(CardLocation::Hand).first
+    card = what.card
     element = card.element
-    loc = card.field_location(we.card_state(index))
+    loc = card.field_location(what)
     we.test_mana[element.to_i] = card.cost/2
     we.test_mana[0] = 100
     old = we.test_mana.sum
-    we.possible_actions.first.perform(game_state)
+    we.possible_actions.first.perform
     we.count_cards(CardLocation::Hand).should eq(MAX_HP-1)
     we.count_cards(loc).should eq(1)
     (we.test_mana.sum).should eq old - card.cost
@@ -83,8 +83,8 @@ describe Spellstorm do
   #get cards to hand
   {we, enemy}.each do |x|
     loop do
-      x.move_card 0, CardLocation::Hand
-      x.move_card 1, CardLocation::Hand
+      CardStateMutable.new(x, 0).move(CardLocation::Hand)
+      CardStateMutable.new(x, 1).move(CardLocation::Hand)
       x.refill_hand
       break if x.card_state(0).location == CardLocation::Hand && x.card_state(1).location == CardLocation::Hand
     end
@@ -97,8 +97,8 @@ describe Spellstorm do
   it "small atack don't penetrate big shield" do
     we.test_mana[0] = 100
     enemy.test_mana[0] = 100
-    we.possible_actions[1].perform(game_state)
-    enemy.possible_actions[1].perform(game_state)
+    we.possible_actions[1].perform
+    enemy.possible_actions[1].perform
     game_state.next_turn
     we.hp.should eq MAX_HP
     we.card_state(1).hp.should eq big_shield.power - small_attack.power

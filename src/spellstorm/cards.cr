@@ -26,7 +26,6 @@ module Spellstorm
   end
   N_ELEMENTS = 5
 
-  alias CardIndex = Int32
   alias ActionArray = Array(Action)
 
   abstract class Card
@@ -40,6 +39,12 @@ module Spellstorm
     def initialize(@name, @cost, @element, @power)
     end
 
+    macro is_pure(x)
+      def {{x}}(state : CardStateMutable)
+        {{x}}(state.raw)
+      end
+    end
+
     def playable(player_state : PlayerState) : Bool
       player_state.max_mana(@element) >= @cost
     end
@@ -49,46 +54,51 @@ module Spellstorm
       CardLocation::FieldOther
     end
 
+    is_pure(field_location)
+
     def get_damage(state : CardState) : Int32
       0
     end
+
+    is_pure(get_damage)
 
     def estim_shield(state : CardState) : Int32
       0
     end
 
-    def damage_hook(state : CardState, other : Card, other_state : CardState, value : Int32) : Int32
+    is_pure(estim_shield)
+
+    def damage_hook(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
       value
     end
 
-    def damage_player(state : CardState, game : GameState, value : Int32)
-      game.parts[state.side.opponent.to_i].hp -= value
+    def damage_player(state : CardStateMutable, value : Int32)
+      state.owner.opponent.hp -= value
     end
 
-    def shield_card(state : CardState, other : Card, other_state : CardState, value : Int32) : Int32
+    def shield_card(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
       value
     end
   end
 
   abstract class Action
-    abstract def perform(state : GameState)
+    abstract def perform
 
-    def initialize(@player : Player)
+    def initialize
     end
   end
 
   class ActionPlay < Action
     getter card_index
 
-    def initialize(@player, @card_index : CardIndex)
+    def initialize(@what : CardStateMutable)
     end
 
-    def perform(state : GameState)
-      st = state.parts[@player.to_i]
-      card = st.deck.cards[card_index]
+    def perform
+      st = @what.owner
+      card = @what.card
       raise "IMPOSSIBLE" unless st.pay_mana(card.element, card.cost)
-      loc = st.deck.cards[card_index].field_location(st.card_state(@card_index))
-      st.move_card(card_index, loc)
+      @what.move(card.field_location(@what))
     end
   end
 end

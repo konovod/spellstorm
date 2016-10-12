@@ -62,7 +62,7 @@ module Spellstorm
     property pos : CardPos
     getter player : Player
 
-    def my_state : CardState
+    def my_state : CardStateMutable
       @states.card_state(@player, @card_index)
     end
 
@@ -71,7 +71,7 @@ module Spellstorm
     end
 
     def visual_index
-      my_state.index # TODO
+      my_state.loc_index
     end
 
     def initialize(@card_index, @states : GameState, @deck : Deck, @player)
