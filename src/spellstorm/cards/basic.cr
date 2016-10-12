@@ -15,7 +15,23 @@ module Spellstorm
     end
 
     def shield_card(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
-      value - @power
+      if value > state.hp
+        value -= state.hp
+        state.hp = 0
+        state.need_processing = true
+        return value
+      else
+        state.hp -= value
+        return 0
+      end
+    end
+
+    def hook_played(state : CardStateMutable)
+      state.hp = @power
+    end
+
+    def hook_processing(state : CardStateMutable)
+      state.move CardLocation::Drop
     end
   end
 

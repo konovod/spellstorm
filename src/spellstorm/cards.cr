@@ -54,21 +54,23 @@ module Spellstorm
       CardLocation::FieldOther
     end
 
-    is_pure(field_location)
-
     def get_damage(state : CardState) : Int32
       0
     end
-
-    is_pure(get_damage)
 
     def estim_shield(state : CardState) : Int32
       0
     end
 
+    is_pure(field_location)
+    is_pure(get_damage)
     is_pure(estim_shield)
 
-    def damage_hook(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
+    def hook_shield(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
+      value
+    end
+
+    def hook_damage(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
       value
     end
 
@@ -76,8 +78,10 @@ module Spellstorm
       state.owner.opponent.hp -= value
     end
 
-    def shield_card(state : CardStateMutable, other : CardStateMutable, value : Int32) : Int32
-      value
+    def hook_played(state : CardStateMutable)
+    end
+
+    def hook_processing(state : CardStateMutable)
     end
   end
 
@@ -99,6 +103,7 @@ module Spellstorm
       card = @what.card
       raise "IMPOSSIBLE" unless st.pay_mana(card.element, card.cost)
       @what.move(card.field_location(@what))
+      card.hook_played(@what)
     end
   end
 end

@@ -7,10 +7,12 @@ module Spellstorm
     property location : CardLocation
     property loc_index : Int32
     property hp : Int32
+    property need_processing : Bool
 
     def initialize(@loc_index)
       @hp = 0
       @location = CardLocation::Deck
+      @need_processing = false
     end
   end
 
@@ -40,6 +42,7 @@ module Spellstorm
     access_property location
     access_property hp
     access_property loc_index
+    access_property need_processing
 
     def reset
       self.hp = 0
@@ -212,16 +215,17 @@ class GameState
         end
         attackers.each do |attacker, dam|
           defenders.each do |defender|
-            dam = attacker.card.damage_hook(attacker, defender, dam)
+            dam = attacker.card.hook_damage(attacker, defender, dam)
             break if dam <= 0
-            dam = defender.card.shield_card(defender, attacker, dam)
+            dam = defender.card.hook_shield(defender, attacker, dam)
             break if dam <= 0
           end
           attacker.card.damage_player(attacker, dam) if dam > 0
         end
       end
-
       who.hp = MAX_HP - enemy.test_damage
+      # cards processing
+      who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
       who.refill_hand
     end
   end
