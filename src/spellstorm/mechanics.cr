@@ -163,9 +163,8 @@ module Spellstorm
     def compact_indices
       CardLocation.values.each do |loc|
         numbers = at_location loc
-        # card_state isn't used here as a (premature?) optimization
-        numbers.sort_by! { |i| @data[i].index } unless loc == CardLocation::Deck
-        numbers.each_with_index { |i, index| @data[i].index = index }
+        numbers.sort_by! { |mut| mut.loc_index } unless loc == CardLocation::Deck
+        numbers.each_with_index { |mut, index| mut.loc_index = index }
       end
     end
 
@@ -179,54 +178,54 @@ module Spellstorm
       result
     end
   end
-end
 
-class GameState
-  property parts
+  class GameState
+    property parts
 
-  def initialize(decks)
-    # TODO - tuple\StaticArray make it nullable
-    @parts = [] of PlayerState
-    @parts << PlayerState.new(self, Player::First, decks[0])
-    @parts << PlayerState.new(self, Player::Second, decks[1])
-    next_turn
-  end
+    def initialize(decks)
+      # TODO - tuple\StaticArray make it nullable
+      @parts = [] of PlayerState
+      @parts << PlayerState.new(self, Player::First, decks[0])
+      @parts << PlayerState.new(self, Player::Second, decks[1])
+      next_turn
+    end
 
-  def card_state(player, card_index)
-    @parts[player.to_i].card_state(card_index)
-  end
+    def card_state(player, card_index)
+      @parts[player.to_i].card_state(card_index)
+    end
 
-  def next_turn
-    Player.values.each do |player|
-      who = @parts[player.to_i]
-      enemy = @parts[player.opponent.to_i]
-      # damage and shields mechanics
-      who_cards = who.at_location(CardLocation.field)
-      enemy_cards = enemy.at_location(CardLocation.field)
-      if who.estim_damage > 0
-        # TODO - remove dynamic allocations here?
-        attackers = Hash(CardStateMutable, Int32).new
-        who_cards.each do |mut|
-          v = mut.card.get_damage(mut)
-          attackers[mut] = v if v > 0
-        end
-        defenders = enemy_cards.select do |def_mut|
-          def_mut.card.estim_shield(def_mut) > 0
-        end
-        attackers.each do |attacker, dam|
-          defenders.each do |defender|
-            dam = attacker.card.hook_damage(attacker, defender, dam)
-            break if dam <= 0
-            dam = defender.card.hook_shield(defender, attacker, dam)
-            break if dam <= 0
+    def next_turn
+      Player.values.each do |player|
+        who = @parts[player.to_i]
+        enemy = @parts[player.opponent.to_i]
+        # damage and shields mechanics
+        who_cards = who.at_location(CardLocation.field)
+        enemy_cards = enemy.at_location(CardLocation.field)
+        if who.estim_damage > 0
+          # TODO - remove dynamic allocations here?
+          attackers = Hash(CardStateMutable, Int32).new
+          who_cards.each do |mut|
+            v = mut.card.get_damage(mut)
+            attackers[mut] = v if v > 0
           end
-          attacker.card.damage_player(attacker, dam) if dam > 0
+          defenders = enemy_cards.select do |def_mut|
+            def_mut.card.estim_shield(def_mut) > 0
+          end
+          attackers.each do |attacker, dam|
+            defenders.each do |defender|
+              dam = attacker.card.hook_damage(attacker, defender, dam)
+              break if dam <= 0
+              dam = defender.card.hook_shield(defender, attacker, dam)
+              break if dam <= 0
+            end
+            attacker.card.damage_player(attacker, dam) if dam > 0
+          end
         end
+        who.hp = MAX_HP - enemy.test_damage
+        # cards processing
+        who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
+        who.refill_hand
       end
-      who.hp = MAX_HP - enemy.test_damage
-      # cards processing
-      who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
-      who.refill_hand
     end
   end
 end
