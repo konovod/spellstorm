@@ -2,7 +2,13 @@ require "./spec_helper"
 
 include Spellstorm
 
-describe Spellstorm do
+SMALL_SHIELD = ShieldCard.new("Малый щит", 2, Element::Neutral, 2)
+BIG_SHIELD = ShieldCard.new("Большой щит", 6, Element::Neutral, 5)
+SMALL_DANGER = DangerCard.new("Малая угроза", 1, Element::Neutral, 1)
+BIG_DANGER = DangerCard.new("Большая угроза", 7, Element::Neutral, 3)
+
+
+describe "Basic mechanics" do
 
   decks = {Deck.new, Deck.new}
   it "decks generation" do
@@ -57,25 +63,14 @@ describe Spellstorm do
     we.count_cards(loc).should eq(1)
     (we.test_mana.sum).should eq old - card.cost
   end
-  #tests of damage system
-  #first, preparation
-  attacks = CardsDB.instance.data.select(&.is_a? DangerCard).sort_by(&.power)
-  shields = CardsDB.instance.data.select(&.is_a? ShieldCard).sort_by(&.power)
-  big_attack = attacks.last
-  small_attack = attacks.first
-  big_shield = shields.last
-  small_shield = shields.first
-  it "cards set not broken" do
-    attacks.size.should be > 1
-    shields.size.should be > 1
-    small_attack.power.should be < big_shield.power
-    big_attack.power.should be > small_shield.power
-  end
+end
+
+describe "Damage system" do
   #patch decks
-  decks[0].cards[0] = big_attack
-  decks[0].cards[1] = big_shield
-  decks[1].cards[0] = small_shield
-  decks[1].cards[1] = small_attack
+  decks = {Deck.new, Deck.new}
+  decks.each &.generate
+  decks[0].cards[0] = BIG_SHIELD
+  decks[1].cards[0] = SMALL_DANGER
   #new game
   game_state = GameState.new(decks)
   we = game_state.parts[Player::First.to_i]
@@ -84,29 +79,28 @@ describe Spellstorm do
   {we, enemy}.each do |x|
     loop do
       CardStateMutable.new(x, 0).move(CardLocation::Hand)
-      CardStateMutable.new(x, 1).move(CardLocation::Hand)
       x.refill_hand
-      break if x.card_state(0).location == CardLocation::Hand && x.card_state(1).location == CardLocation::Hand
+      break if x.card_state(0).location == CardLocation::Hand
     end
   end
   #sanity check
   it "prepare for damage" do
-    we.card_state(1).location.should eq CardLocation::Hand
+    we.card_state(0).location.should eq CardLocation::Hand
     enemy.count_cards(CardLocation::Hand).should eq MAX_HP
   end
   it "small atack don't penetrate big shield" do
     we.test_mana[0] = 100
     enemy.test_mana[0] = 100
-    we.possible_actions[1].perform
-    enemy.possible_actions[1].perform
+    we.possible_actions.first.perform
+    enemy.possible_actions.first.perform
     game_state.next_turn
     we.hp.should eq MAX_HP
-    we.card_state(1).hp.should eq big_shield.power - small_attack.power
+    we.card_state(0).hp.should eq BIG_SHIELD.power - SMALL_DANGER.power
   end
   it "but shield fails over time" do
     10.times {game_state.next_turn}
-    we.hp.should eq MAX_HP - small_attack.power
-    we.card_state(1).location.should eq CardLocation::Drop
+    we.hp.should eq MAX_HP - SMALL_DANGER.power
+    we.card_state(0).location.should eq CardLocation::Drop
   end
 
 end
