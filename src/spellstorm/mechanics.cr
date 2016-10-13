@@ -201,6 +201,7 @@ module Spellstorm
         # damage and shields mechanics
         who_cards = who.at_location(CardLocation.field)
         enemy_cards = enemy.at_location(CardLocation.field)
+        enemy.hp = MAX_HP
         if who.estim_damage > 0
           # TODO - remove dynamic allocations here?
           attackers = Hash(CardStateMutable, Int32).new
@@ -221,10 +222,10 @@ module Spellstorm
             attacker.card.damage_player(attacker, dam) if dam > 0
           end
         end
-        who.hp = MAX_HP - enemy.test_damage
+        enemy.hp -= who.test_damage
         # cards processing
         who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
-        who.refill_hand
+        enemy.refill_hand
       end
     end
   end
