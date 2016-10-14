@@ -74,11 +74,9 @@ def prepare_cards(card1, card2)
   game_state = GameState.new(decks)
   #get cards to hand
   game_state.parts.each do |x|
-    loop do
-      CardStateMutable.new(x, 0).move(CardLocation::Hand)
-      x.refill_hand
-      break if x.card_state(0).location == CardLocation::Hand
-    end
+    x.at_location(CardLocation::Hand).each &.move(CardLocation::Drop)
+    CardStateMutable.new(x, 0).move(CardLocation::Hand)
+    x.refill_hand
   end
   game_state
 end
@@ -123,7 +121,40 @@ describe "Damage system" do
     enemy.hp.should eq MAX_HP - BIG_DANGER.power
     enemy.card_state(0).location.should eq CardLocation::Drop
   end
+end
 
+ELEMENT1 = Element::Fire
+ELEMENT2 = Element::Earth
+SOURCE1 = SourceCard.new("Малый источник", 2, ELEMENT1, 2)
+SOURCE2 = SourceCard.new("Большой источник", 5, ELEMENT2, 5)
 
+def prepare_source_cards(card1, card2)
+  #patch decks
+  decks = {Deck.new, Deck.new}
+  decks.each &.generate
+  decks[0].cards[0] = card1
+  decks[0].cards[1] = card2
+  #new game
+  game_state = GameState.new(decks)
+  we = game_state.parts.first
+  enemy = game_state.parts.last
+  enemy.test_damage = MAX_HP-2
+  game_state.next_turn
+  #drop current cards
+  we.at_location(CardLocation::Hand).each &.move(CardLocation::Drop)
+  CardStateMutable.new(we, 0).move(CardLocation::Hand)
+  CardStateMutable.new(we, 1).move(CardLocation::Hand)
+  game_state
+end
 
+describe "sources system" do
+  game_state = prepare_source_cards SOURCE1, SOURCE2
+  we = game_state.parts.first
+  src1 = we.card_state(0)
+  it "playing a source costs mana" do
+    we.own_mana = SOURCE1.cost
+    we.possible_actions[0].perform
+    we.own_mana.should eq 0
+    src1.hp.should eq 0
+  end
 end

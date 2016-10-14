@@ -40,8 +40,8 @@ module Spellstorm
     end
 
     macro is_pure(x)
-      def {{x}}(state : CardStateMutable)
-        {{x}}(state.raw)
+      def {{x}}(state : CardStateMutable, *args)
+        {{x}}(state.raw, *args)
       end
     end
 
@@ -83,6 +83,20 @@ module Spellstorm
 
     def hook_processing(state : CardStateMutable)
     end
+
+    def mana_feed(state : CardStateMutable, element : Element, value : Int32)
+      false
+    end
+
+    def mana_provide(state : CardStateMutable, element : Element, value : Int32)
+      false
+    end
+
+    def mana_source(state : CardState, element : Element)
+      0
+    end
+
+    is_pure(mana_source)
   end
 
   abstract class Action

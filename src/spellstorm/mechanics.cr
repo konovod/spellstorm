@@ -119,15 +119,39 @@ module Spellstorm
 
     def pay_mana(element, value)
       return false if value > max_mana(element)
-      # TODO - source mechanics
-      if value >= @test_mana[element.to_i]
-        value -= @test_mana[element.to_i]
-        @test_mana[element.to_i] = 0
-        @test_mana[Element::Neutral.to_i] -= value
-      else
-        @test_mana[element.to_i] -= value
+      # first use @test_mana
+      {element.to_i, Element::Neutral.to_i}.each do |i|
+        if value > @test_mana[i]
+          value -= @test_mana[i]
+          @test_mana[i] = 0
+        else
+          @test_mana[i] -= value
+          return true
+        end
       end
-      true
+      # now use sources
+      sources = at_location(CardLocation.field).map { |mut|
+        {mut, mut.card.mana_source(mut, element)}
+      }.select { |mut, value| value > 0 }
+      sources_max = sources.sum { |mut, value| value }
+      if value >= sources_max
+        # use all available mana
+        sources.each do |mut, mana|
+          mut.card.mana_provide(mut, element, mana)
+          value -= mana
+        end
+      else
+        if sources.size > 1
+          sources.sort_by! { |tuple| {tuple[0].card.power - tuple[1], tuple[0].card.power} }
+        end
+        NOT DONE
+        int_part = value
+        return true
+      end
+      # finally, use @own_mana
+      return false if value > @own_mana
+      @own_mana -= value
+      return true
     end
 
     def refill_hand
