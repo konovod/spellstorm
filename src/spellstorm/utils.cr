@@ -3,9 +3,10 @@ require "crsfml/*"
 alias RectType = SF::RectangleShape
 
 module Spellstorm
-  MAX_HP    =  5
-  DECK_SIZE = 40
-  GAME_SIZE = DECK_SIZE * 2
+  MAX_HP       =  5
+  MAX_OWN_MANA = 10
+  DECK_SIZE    = 40
+  GAME_SIZE    = DECK_SIZE * 2
 
   CARD_WIDTH  = 140
   CARD_HEIGHT = 160

@@ -74,7 +74,9 @@ module Spellstorm
     getter counts
     getter deck
     property own_mana
+    property mana_spent
     property data
+    getter player
 
     def initialize(@game, @player : Player, @deck : Deck)
       @data = StaticArray(CardState, DECK_SIZE).new { |i| CardState.new(i) }
@@ -83,6 +85,7 @@ module Spellstorm
       @counts = StaticArray(Int32, N_CARD_LOCATIONS).new { |i| i == CardLocation::Deck.to_i ? DECK_SIZE : 0 }
       @test_mana = StaticArray(Int32, N_ELEMENTS).new(0)
       @own_mana = 0
+      @mana_spent = StaticArray(Int32, N_ELEMENTS).new(0)
     end
 
     def opponent
@@ -118,6 +121,38 @@ module Spellstorm
     end
 
     def pay_mana(element, value)
+      result = decrease_mana(element, value)
+      mana_spent[element.to_i] += value if result
+      result
+    end
+
+    def sink_mana(element, amount)
+      sinks = at_location(CardLocation.field).map { |mut|
+        {mut, mut.card.mana_sink(mut, element)}
+      }.select { |mut, value| value > 0 }
+      sink_max = sinks.sum { |mut, value| value }
+      sink_safe = sink_max - sinks.size
+      if amount >= sink_max
+        # all overflows
+        sinks.each do |mut, value|
+          mut.card.mana_feed(mut, element, value)
+        end
+      elsif amount >= sink_safe
+        # some overflows
+        sinks.each do |mut, value|
+          mut.card.mana_feed(mut, element, value - 1)
+        end
+        sinks.sort_by! { |(mut, value)| mut.card.power }
+        (amount - sink_safe).times do |i|
+          mut = sinks[i][0]
+          mut.card.mana_feed(mut, element, 1)
+        end
+      else
+        # TODO !!!!
+      end
+    end
+
+    def decrease_mana(element, value)
       return false if value > max_mana(element)
       # first use @test_mana
       {element.to_i, Element::Neutral.to_i}.each do |i|
@@ -223,6 +258,10 @@ module Spellstorm
       @parts[player.to_i].card_state(card_index)
     end
 
+    def battle_over(winner : Player)
+      raise "#{winner} wins!"
+    end
+
     def next_turn
       Player.values.each do |player|
         who = @parts[player.to_i]
@@ -252,6 +291,13 @@ module Spellstorm
           end
         end
         enemy.hp -= who.test_damage
+        battle_over(enemy.player.opponent) if enemy.hp <= 0
+        # mana refresh
+        who.own_mana += 1 if who.own_mana < MAX_OWN_MANA
+        Element.values.each do |elem|
+          who.sink_mana(elem, who.mana_spent[elem.to_i]) if who.mana_spent[elem.to_i] > 0
+          who.mana_spent[elem.to_i] = 0
+        end
         # cards processing
         who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
         enemy.refill_hand

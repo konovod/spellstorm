@@ -39,6 +39,7 @@ describe "Basic mechanics" do
   end
   it "possible_actions : play" do
     we.test_mana[0] = 0
+    we.own_mana = 0
     we.possible_actions.size.should eq 0
     we.test_mana[0] = 100
     we.possible_actions.size.should eq MAX_HP

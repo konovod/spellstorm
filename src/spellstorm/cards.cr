@@ -96,7 +96,12 @@ module Spellstorm
       0
     end
 
+    def mana_sink(state : CardState, element : Element)
+      0
+    end
+
     is_pure(mana_source)
+    is_pure(mana_sink)
   end
 
   abstract class Action
