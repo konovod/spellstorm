@@ -98,9 +98,15 @@ module Spellstorm
       at_location(CardLocation.field).sum { |mut| mut.card.estim_shield(mut) }
     end
 
-    def mana(element)
-      @test_mana[element.to_i]
-      # TODO - source mechanics
+    def max_mana(element)
+      # test_mana
+      result = @test_mana[element.to_i]
+      result += @test_mana[Element::Neutral.to_i] unless element == Element::Neutral
+      # sources
+      result += at_location(CardLocation.field).sum { |mut| mut.card.mana_source(mut, element) }
+      # own_mana
+      result += @own_mana
+      result
     end
 
     def count_cards(location : CardLocation)
@@ -109,12 +115,6 @@ module Spellstorm
 
     def card_state(card_index)
       CardStateMutable.new(self, card_index)
-    end
-
-    def max_mana(element)
-      allowed = mana(Element::Neutral)
-      allowed += mana(element) unless element == Element::Neutral
-      allowed
     end
 
     def pay_mana(element, value)
@@ -142,11 +142,16 @@ module Spellstorm
         end
       else
         if sources.size > 1
-          sources.sort_by! { |tuple| {tuple[0].card.power - tuple[1], tuple[0].card.power} }
+          sources.sort_by! { |(mut, power)| {mut.card.power - power, mut.card.power} }
         end
-        NOT DONE
-        int_part = value
-        return true
+        # TODO - there is possible optimization, but does it worth it?
+        loop do
+          sources.each do |src, power|
+            src.card.mana_provide(src, element, 1)
+            value -= 1
+            return true if value <= 0
+          end
+        end
       end
       # finally, use @own_mana
       return false if value > @own_mana
