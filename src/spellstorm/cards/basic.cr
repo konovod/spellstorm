@@ -69,5 +69,33 @@ module Spellstorm
     def field_location(state : CardState) : CardLocation
       CardLocation::FieldSource
     end
+
+    def hook_processing(state : CardStateMutable)
+      state.move CardLocation::Drop
+    end
+
+    def mana_feed(state : CardStateMutable, element : Element, value : Int32)
+      return false if element != @element || state.hp + value > @power
+      state.hp += value
+      state.need_processing = state.hp >= @power
+      true
+    end
+
+    def mana_provide(state : CardStateMutable, element : Element, value : Int32)
+      return false if element != @element || state.hp < value
+      state.hp -= value
+      state.need_processing = state.hp >= @power
+      true
+    end
+
+    def mana_source(state : CardState, element : Element)
+      return 0 if element != @element
+      state.hp
+    end
+
+    def mana_sink(state : CardState, element : Element)
+      return 0 if element != @element
+      @power - state.hp
+    end
   end
 end

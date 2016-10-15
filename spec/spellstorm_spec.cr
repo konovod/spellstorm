@@ -159,6 +159,7 @@ describe "sources system" do
     src1.hp.should eq 0
   end
   it "mana of same color accumulates" do
+    we.mana_spent[ELEMENT1.to_i] = 0
     we.own_mana = 1
     we.pay_mana ELEMENT1, 1
     game_state.next_turn
