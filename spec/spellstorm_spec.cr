@@ -158,4 +158,18 @@ describe "sources system" do
     we.own_mana.should eq 0
     src1.hp.should eq 0
   end
+  it "mana of same color accumulates" do
+    we.own_mana = 1
+    we.pay_mana ELEMENT1, 1
+    game_state.next_turn
+    src1.hp.should eq 1
+  end
+  it "mana of wrong color don't accumulates" do
+    we.own_mana = 1
+    we.pay_mana ELEMENT2, 1
+    src1.hp.should eq 1
+    game_state.next_turn
+    src1.hp.should eq 1
+  end
+
 end

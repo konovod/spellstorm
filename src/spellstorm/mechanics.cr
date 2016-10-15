@@ -148,7 +148,14 @@ module Spellstorm
           mut.card.mana_feed(mut, element, 1)
         end
       else
-        # TODO !!!!
+        # nobody overflows, mana fills all by one point never reaching max value
+        while amount > 0
+          sinks.select! do |mut, value|
+            mut.card.mana_feed mut, element, 1
+            amount -= 1
+            mut.card.mana_sink(mut, element) > 1
+          end
+        end
       end
     end
 
