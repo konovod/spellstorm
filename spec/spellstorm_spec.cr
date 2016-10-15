@@ -172,5 +172,25 @@ describe "sources system" do
     game_state.next_turn
     src1.hp.should eq 1
   end
+  it "mana of same color is used" do
+    we.own_mana = 0
+    src1.hp.should eq 1
+    we.max_mana(ELEMENT1).should eq 1
+    we.pay_mana ELEMENT1, 1
+    src1.hp.should eq 0
+    we.max_mana(ELEMENT1).should eq 0
+    we.mana_spent[ELEMENT1.to_i] = 0
+    game_state.next_turn
+    src1.hp.should eq 0
+  end
+  it "mana sources overflow and blows on next turn" do
+    we.own_mana = 10
+    we.pay_mana ELEMENT1, 10
+    game_state.next_turn
+    src1.hp.should eq src1.card.power
+    src1.location.should eq CardLocation::FieldSource
+    game_state.next_turn
+    src1.location.should eq CardLocation::Drop
+  end
 
 end

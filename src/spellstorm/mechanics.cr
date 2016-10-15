@@ -299,14 +299,14 @@ module Spellstorm
         end
         enemy.hp -= who.test_damage
         battle_over(enemy.player.opponent) if enemy.hp <= 0
+        # cards processing
+        who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
         # mana refresh
         who.own_mana += 1 if who.own_mana < MAX_OWN_MANA
         Element.values.each do |elem|
           who.sink_mana(elem, who.mana_spent[elem.to_i]) if who.mana_spent[elem.to_i] > 0
           who.mana_spent[elem.to_i] = 0
         end
-        # cards processing
-        who.at_location(CardLocation.field).each { |mut| mut.card.hook_processing(mut) if mut.need_processing }
         enemy.refill_hand
       end
     end
