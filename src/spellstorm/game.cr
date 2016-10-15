@@ -13,11 +13,23 @@ module Spellstorm
     def on_mouse(event, x, y)
       # return unless event.is_a? SF::Event::MouseButtonReleased
 
-      card = @table.find_card(x, y)
-      if card && card.open
-        @table.selected_card = card
+      vcard = @table.find_card(x, y)
+      if vcard && vcard.open
+        @table.selected_card = vcard
       else
         @table.selected_card = nil
+      end
+
+      if event.is_a? SF::Event::MouseButtonReleased && event.button.right?
+        skip_turn
+        @some_action = true
+      end
+
+      if event.is_a? SF::Event::MouseButtonReleased && event.button.left? && vcard
+        we = @table.game_state.parts[Player::First.to_i]
+        return unless vcard.card.playable(we)
+        ActionPlay.new(vcard.my_state).perform
+        @some_action = true
       end
       # side = @table.sides[Player::First]
       # card = side.find_card(x,y)
@@ -32,6 +44,23 @@ module Spellstorm
       #   end
       # end
 
+    end
+
+    def we
+      @table.game_state.parts[Player::First.to_i]
+    end
+
+    def enemy
+      @table.game_state.parts[Player::Second.to_i]
+    end
+
+    def skip_turn
+      loop do
+        x = enemy.possible_actions
+        break if x.empty?
+        x.sample.perform
+      end
+      @table.game_state.next_turn
     end
 
     def on_key(event : SF::Event::KeyEvent, key)
