@@ -11,6 +11,9 @@ module Spellstorm
   CARD_WIDTH  = 140
   CARD_HEIGHT = 160
 
+  # DEBUG_MODE = CardLocation::FieldDanger
+  DEBUG_MODE = false
+
   ANIM_SPEED =  20
   TOP_HIDING = 100
 
@@ -42,9 +45,9 @@ module Spellstorm
       angle0: -20.0, dangle: 5.0,
     },
     CardLocation::FieldDanger => {
-      pos: vec(10, Y0 - CARD_HEIGHT - 75),
+      pos: vec(10, Y0 - CARD_HEIGHT - 40),
       delta: vec(CARD_WIDTH + 5, 0),
-      angle0: -20.0, dangle: 5.0,
+      angle0: 0.0, dangle: 0.0,
     },
     CardLocation::FieldOther => {
       pos: vec(10, Y0 - CARD_HEIGHT - 50),

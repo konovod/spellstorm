@@ -36,7 +36,7 @@ module Spellstorm
 
     def check_positions
       @game_state.parts.each &.compact_indices
-      @drawn_cards.sort_by! { |dcard| dcard.my_state.index }
+      @drawn_cards.sort_by! { |dcard| dcard.visual_index }
       @drawn_cards.select do |card|
         card.open = card.should_open
         card.pos != card.calc_pos &&

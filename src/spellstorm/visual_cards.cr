@@ -126,6 +126,7 @@ module Spellstorm
 
     def calc_pos(location, index)
       base = CARD_COORDS[location]
+      base = CARD_COORDS[DEBUG_MODE] if DEBUG_MODE && location != CardLocation::Deck
       result = CardPos.new(base[:pos] + base[:delta]*index, base[:angle0] + base[:dangle]*index)
       result.invert if reverted
       return result

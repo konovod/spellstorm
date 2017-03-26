@@ -1,4 +1,4 @@
-require "crsfml/crsfml.cr"
+require "crsfml"
 require "./engine/*"
 require "./cards/*"
 require "./utils.cr"
@@ -31,19 +31,6 @@ module Spellstorm
         ActionPlay.new(vcard.my_state).perform
         @some_action = true
       end
-      # side = @table.sides[Player::First]
-      # card = side.find_card(x,y)
-      # if card
-      #   #p card.card.name
-      #   if card.state == CardState::Deck
-      #     side.draw_card
-      #   elsif card.state == CardState::Hand
-      #       side.play_card(card)
-      #   else
-      #     side.drop_card(card)
-      #   end
-      # end
-
     end
 
     def we
