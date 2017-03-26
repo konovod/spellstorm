@@ -7,6 +7,5 @@ authors:
 dependencies:
   crsfml:
     github: BlaXpirit/crsfml
-    version: 2.4.1
 
 license: GPL-3.0

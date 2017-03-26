@@ -1,4 +1,4 @@
-require "crsfml/crsfml.cr"
+require "crsfml"
 require "../config.cr"
 
 # TODO - ugly

@@ -1,4 +1,4 @@
-require "crsfml/crsfml.cr"
+require "crsfml"
 
 module Engine
   # TODO - atlas?
